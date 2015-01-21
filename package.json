@@ -1,0 +1,17 @@
+{
+  "author": "Christopher Thorn <chris@koding.com> (http://koding.com)",
+  "private": true,
+  "name": "bongo-client",
+  "description": "Use shared bongo API in the browser, or another node process",
+  "version": "0.1.0",
+  "homepage": "http://bongojs.com",
+  "main": "index.coffee",
+  "dependencies": {
+    "dnode": "0.9.x",
+    "dnode-protocol": "git+ssh://git@github.com:koding/dnode-protocol",
+    "hat": "0.0.x",
+    "microemitter": "git+ssh://git@github.com:koding/microemitter",
+    "mongoop": "git+ssh://git@github.com:koding/mongoop",
+    "traverse": "0.4.x"
+  }
+}
