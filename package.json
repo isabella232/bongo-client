@@ -3,7 +3,7 @@
   "private": true,
   "name": "bongo-client",
   "description": "Use shared bongo API in the browser, or another node process",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "http://bongojs.com",
   "main": "index.coffee",
   "dependencies": {
