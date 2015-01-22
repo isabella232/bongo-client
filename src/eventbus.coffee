@@ -9,7 +9,7 @@ module.exports = class EventBus
     @channels = {}
     @counts = {}
 
-  bound: require 'koding-bound'
+  bound: require './bound'
 
   dispatch:(routingKey, payload)->
     @tree.emit routingKey, payload

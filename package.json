@@ -8,10 +8,20 @@
   "main": "index.coffee",
   "dependencies": {
     "dnode": "0.9.x",
-    "dnode-protocol": "git+ssh://git@github.com:koding/dnode-protocol",
+    "koding-dnode-protocol": "git+ssh://git@github.com:koding/dnode-protocol",
     "hat": "0.0.x",
+    "kd-shim-jspath": "^0.1.1",
     "microemitter": "git+ssh://git@github.com:koding/microemitter",
     "mongoop": "git+ssh://git@github.com:koding/mongoop",
+    "sinkrow": "git+ssh://git@github.com:koding/sinkrow",
     "traverse": "0.4.x"
+  },
+  "devDependencies": {
+    "browserify": "^8.1.1",
+    "coffeeify": "^1.0.0"
+  },
+  "browser": {
+    "jspath": "kd-shim-jspath",
+    "dnode-protocol": "koding-dnode-protocol"
   }
 }
