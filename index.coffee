@@ -20,6 +20,7 @@ Unfancy models for MongoDB
 @description: client-side bongo.
 ###
 # core
+Promise = require 'bluebird'
 EventEmitter = require 'microemitter'
 bound_ = require './src/bound'
 

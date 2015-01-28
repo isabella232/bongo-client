@@ -1,3 +1,5 @@
+Promise = require 'bluebird'
+
 module.exports = (fn) ->
   # if any signature takes a callback, the callback is mandatory:
   hasMandatoryCallback = fn.signatures[0].hasCallback()
