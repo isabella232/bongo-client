@@ -22,7 +22,7 @@ Unfancy models for MongoDB
 # core
 Promise = require 'bluebird'
 EventEmitter = require 'microemitter'
-bound_ = require './src/bound'
+bound_ = require './lib/bound'
 
 module.exports = class Bongo extends EventEmitter
 
@@ -38,20 +38,20 @@ module.exports = class Bongo extends EventEmitter
   JsPath    = @JsPath = require 'jspath'
 
   @dnodeProtocol = require 'dnode-protocol'
-  @dnodeProtocol.Scrubber = require './src/scrubber'
+  @dnodeProtocol.Scrubber = require './lib/scrubber'
 
   {Store, Scrubber} = @dnodeProtocol
 
   @EventEmitter = EventEmitter
-  Model = @Model = require './src/model'
-  @ListenerTree = require './src/listenertree'
-  EventBus  = @EventBus = require './src/eventbus'
-  OpaqueType = require './src/opaquetype'
-  Signature = require './src/signature'
-  @promibackify = require './src/promibackify'
+  Model = @Model = require './lib/model'
+  @ListenerTree = require './lib/listenertree'
+  EventBus  = @EventBus = require './lib/eventbus'
+  OpaqueType = require './lib/opaquetype'
+  Signature = require './lib/signature'
+  @promibackify = require './lib/promibackify'
 
   # mixin the event emitter for the AMQP broker
-  Model::mixin require './src/eventemitter/broker'
+  Model::mixin require './lib/eventemitter/broker'
   # need these aliases:
   Model::off = Model::removeListener
   Model::addGlobalListener = Model::on
@@ -61,7 +61,7 @@ module.exports = class Bongo extends EventEmitter
 
   {slice} = []
 
-  {extend} = require './src/util'
+  {extend} = require './lib/util'
 
   {race, sequence, dash} = require 'sinkrow'
   {@daisy, @dash, @sequence, @race} = require 'sinkrow'
@@ -105,7 +105,7 @@ module.exports = class Bongo extends EventEmitter
 
   isConnected: -> return @readyState is CONNECTED
 
-  cacheable: require './src/cacheable'
+  cacheable: require './lib/cacheable'
 
   cacheableAsync: (rest...) ->
     new Promise (resolve, reject) =>

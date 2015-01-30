@@ -1,21 +1,18 @@
 {
-  "author": "Christopher Thorn <chris@koding.com> (http://koding.com)",
-  "private": true,
   "name": "bongo-client",
-  "description": "Use shared bongo API in the browser, or another node process",
+  "private": true,
   "version": "0.1.2",
-  "homepage": "http://bongojs.com",
   "main": "index.coffee",
   "dependencies": {
     "bluebird": "^2.9.3",
-    "dnode": "0.9.x",
-    "hat": "0.0.x",
-    "kd-shim-jspath": "^0.1.1",
+    "dnode": "^1.2.0",
+    "hat": "0.0.3",
+    "kd-shim-jspath": "^0.1.4",
     "koding-dnode-protocol": "git+ssh://git@github.com:koding/dnode-protocol",
     "microemitter": "git+ssh://git@github.com:koding/microemitter",
     "mongoop": "git+ssh://git@github.com:koding/mongoop",
     "sinkrow": "git+ssh://git@github.com:koding/sinkrow",
-    "traverse": "0.4.x"
+    "traverse": "^0.6.6"
   },
   "devDependencies": {
     "browserify": "^8.1.1",
