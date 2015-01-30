@@ -1,7 +1,6 @@
-'use strict'
-
+sinkrow = require 'sinkrow'
 ModelLoader = require './modelloader'
-{dash} = require 'sinkrow'
+
 
 module.exports = ->
   switch arguments.length
@@ -12,15 +11,18 @@ module.exports = ->
     else
       throw new Error 'Bongo#cacheable expects either 2 or 3 arguments.'
 
+
 getModelLoader = do ->
   loading_ = {}
   (constructor, id)->
     loading_[constructor.name] or= {}
     loader = loading_[constructor.name][id] or= new ModelLoader(constructor, id)
 
+
 handleByName =(strName, callback)->
   if 'function' is typeof @fetchName then @fetchName strName, callback
   else callback new Error 'Client must provide an implementation of fetchName!'
+
 
 handleSingle =(constructorName, _id, callback)->
   # TODO: this implementation sucks; reimplement.
@@ -46,6 +48,7 @@ handleSingle =(constructorName, _id, callback)->
       callback null, model
   return
 
+
 handleBatch =(batch, callback)->
   return handleByName.call @, batch, callback  if 'string' is typeof batch
   models = []
@@ -56,5 +59,6 @@ handleBatch =(batch, callback)->
       else
         models[i] = model
         queue.fin()
-  dash queue, -> callback null, models
+  sinkrow.dash queue, -> callback null, models
   return
+

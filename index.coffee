@@ -1,28 +1,7 @@
-'use strict'
-###
-Bongo.js
-Unfancy models for MongoDB
-
-(c) 2011 Koding, Inc.
-
-@module: bongo-client
-@author: Christopher Thorn <chris@koding.com>
-###
-###
-@snippet.
-@description: feature-detect the browser.
-@todo: is there an improvement?
-@foo
-###
-
-###
-@class: bongo (client)
-@description: client-side bongo.
-###
-# core
 Promise = require 'bluebird'
 EventEmitter = require 'microemitter'
 bound_ = require './lib/bound'
+
 
 module.exports = class Bongo extends EventEmitter
 
@@ -60,11 +39,6 @@ module.exports = class Bongo extends EventEmitter
   # @KDML = require 'kdml'
 
   {slice} = []
-
-  {extend} = require './lib/util'
-
-  {race, sequence, dash} = require 'sinkrow'
-  {@daisy, @dash, @sequence, @race} = require 'sinkrow'
 
   @bound = bound_
 
