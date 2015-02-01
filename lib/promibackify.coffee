@@ -15,7 +15,7 @@ module.exports = (fn) ->
           when err?
             reject err
           when rest.length
-            warn new Error "Trailing callback parameters detected!"
+            console.warn new Error "Trailing callback parameters detected!"
             resolve result
           else
             resolve result
