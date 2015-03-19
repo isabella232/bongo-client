@@ -66,7 +66,8 @@ module.exports = class Bongo extends EventEmitter
           @off 'ready'
     @setOutboundTimer()  if @batchRequests
     unless @useWebsockets
-      process.nextTick @bound 'xhrHandshake'
+      @once 'ready', =>
+        process.nextTick @bound 'xhrHandshake'
     process.nextTick =>
       @api = @createRemoteApiShims @apiDescriptor
 
