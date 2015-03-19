@@ -1,7 +1,7 @@
 {
   "name": "bongo-client",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "index.coffee",
   "dependencies": {
     "bluebird": "^2.9.3",
