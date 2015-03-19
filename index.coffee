@@ -263,6 +263,7 @@ module.exports = class Bongo extends EventEmitter
 
   reconnectHelper:->
     if @api?
+      @authenticateUser()
       @readyState = CONNECTED
       @emit 'ready'
 
