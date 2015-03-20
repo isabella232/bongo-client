@@ -66,7 +66,8 @@ module.exports = class Bongo extends EventEmitter
           @off 'ready'
     @setOutboundTimer()  if @batchRequests
     unless @useWebsockets
-      process.nextTick @bound 'xhrHandshake'
+      @once 'ready', =>
+        process.nextTick @bound 'xhrHandshake'
     process.nextTick =>
       @api = @createRemoteApiShims @apiDescriptor
 
@@ -263,11 +264,15 @@ module.exports = class Bongo extends EventEmitter
 
   reconnectHelper:->
     if @api?
+      @authenticateUser()
       @readyState = CONNECTED
       @emit 'ready'
 
   connectHelper:(callback)->
-    @mq.once 'connected', callback.bind @  if callback?
+    @mq.once 'connected', =>
+      @emit 'ready'
+      callback?()
+
     @channelName = createBongoName @resourceName
 
     @channel = @mq.subscribe @channelName, {connectDirectly:yes}
@@ -308,7 +313,9 @@ module.exports = class Bongo extends EventEmitter
         @readyState = CONNECTING
         @mq.connect()
         if callback?
-          @mq.on 'connected', -> callback null
+          @mq.on 'connected', =>
+            @emit 'ready'
+            callback null
       else
         @readyState = CONNECTING
         @connectHelper callback
