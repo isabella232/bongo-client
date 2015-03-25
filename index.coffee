@@ -68,8 +68,8 @@ module.exports = class Bongo extends EventEmitter
     unless @useWebsockets
       @once 'ready', =>
         process.nextTick @bound 'xhrHandshake'
-    process.nextTick =>
-      @api = @createRemoteApiShims @apiDescriptor
+
+    @api = @createRemoteApiShims @apiDescriptor
 
     if @mq?
       @eventBus = new EventBus @mq
@@ -263,7 +263,7 @@ module.exports = class Bongo extends EventEmitter
         # console.log method
 
   reconnectHelper:->
-    if @api?
+    @mq.ready =>
       @authenticateUser()
       @readyState = CONNECTED
       @emit 'ready'
