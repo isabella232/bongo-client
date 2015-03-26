@@ -249,9 +249,9 @@ module.exports = class Bongo extends EventEmitter
 
   reconnectHelper:->
     @mq.ready =>
-      @authenticateUser()
       @readyState = CONNECTED
       @emit 'ready'
+      @authenticateUser()
 
   connectHelper:(callback)->
     @mq.once 'connected', =>
