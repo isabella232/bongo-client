@@ -364,8 +364,8 @@ module.exports = class Bongo extends EventEmitter
   setOutboundTimer: ->
     @outboundQueue = []
     @outboundTimer = setInterval =>
-      if @outboundQueue.length
-        @sendXhr @apiEndpoint, 'POST', @outboundQueue
+      if (messages = @outboundQueue.splice 0).length
+        @sendXhr @apiEndpoint, 'POST', messages
       @outboundQueue.length = 0
     , BATCH_CHUNK_MS
 
