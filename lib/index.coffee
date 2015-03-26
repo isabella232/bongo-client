@@ -1,6 +1,6 @@
 Promise = require 'bluebird'
 EventEmitter = require 'microemitter'
-bound_ = require './lib/bound'
+bound_ = require './bound'
 
 
 module.exports = class Bongo extends EventEmitter
@@ -17,20 +17,20 @@ module.exports = class Bongo extends EventEmitter
   JsPath    = @JsPath = require 'jspath'
 
   @dnodeProtocol = require 'dnode-protocol'
-  @dnodeProtocol.Scrubber = require './lib/scrubber'
+  @dnodeProtocol.Scrubber = require './scrubber'
 
   {Store, Scrubber} = @dnodeProtocol
 
   @EventEmitter = EventEmitter
-  Model = @Model = require './lib/model'
-  @ListenerTree = require './lib/listenertree'
-  EventBus  = @EventBus = require './lib/eventbus'
-  OpaqueType = require './lib/opaquetype'
-  Signature = require './lib/signature'
-  @promibackify = require './lib/promibackify'
+  Model = @Model = require './model'
+  @ListenerTree = require './listenertree'
+  EventBus  = @EventBus = require './eventbus'
+  OpaqueType = require './opaquetype'
+  Signature = require './signature'
+  @promibackify = require './promibackify'
 
   # mixin the event emitter for the AMQP broker
-  Model::mixin require './lib/eventemitter/broker'
+  Model::mixin require './eventemitter/broker'
   # need these aliases:
   Model::off = Model::removeListener
   Model::addGlobalListener = Model::on
@@ -80,7 +80,7 @@ module.exports = class Bongo extends EventEmitter
 
   isConnected: -> return @readyState is CONNECTED
 
-  cacheable: require './lib/cacheable'
+  cacheable: require './cacheable'
 
   cacheableAsync: (rest...) ->
     new Promise (resolve, reject) =>
