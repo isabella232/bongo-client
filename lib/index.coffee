@@ -335,9 +335,6 @@ module.exports = class Bongo extends EventEmitter
   send:(method, args)->
     args = [args] unless Array.isArray args
 
-    if @mq? and not @channel
-      throw new Error 'No channel!'
-
     scrubber = new Scrubber @localStore
     scrubber.scrub args, =>
       message = scrubber.toDnodeProtocol()
@@ -348,6 +345,10 @@ module.exports = class Bongo extends EventEmitter
 
   sendHelper: (message) ->
     if @useWebsockets
+
+      if @mq? and not @channel
+        throw new Error 'No channel!'
+
       messageString = JSON.stringify message
       if @channel.isOpen
         @channel.publish messageString
