@@ -377,12 +377,13 @@ module.exports = class Bongo extends EventEmitter
     xhr.open method, url
     xhr.setRequestHeader "Content-type", "application/json;charset=UTF-8"
     xhr.onreadystatechange = =>
-      if xhr.status is 0
-        return # TODO: try again with backoff
+
+      return  if xhr.readyState is 0   # 0: UNSENT
+      return  if xhr.readyState isnt 4 # 4: DONE
+
       if xhr.status >= 400
         @emit 'error', new Error "XHR Error: #{ xhr.status }"
 
-      return  if xhr.readyState isnt 4
       return  if xhr.status not in [200, 304]
 
       requests = JSON.parse xhr.response
