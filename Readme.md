@@ -2,4 +2,4 @@
 
 # license
 
-2005 Koding, Inc
+2015 Koding, Inc
