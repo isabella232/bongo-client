@@ -1,12 +1,14 @@
 'use strict';
-var EventEmitter, Model,
+var EventEmitter, Model, extend,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 EventEmitter = require('microemitter');
 
+extend = require('./util').extend;
+
 module.exports = Model = (function(_super) {
-  var JsPath, MongoOp, Traverse, createId, extend;
+  var JsPath, MongoOp, Traverse, createId;
 
   __extends(Model, _super);
 
@@ -21,8 +23,6 @@ module.exports = Model = (function(_super) {
   createId = Model.createId = require('hat');
 
   Traverse = require('traverse');
-
-  extend = require('./util').extend;
 
   Model.isOpaque = function() {
     return false;

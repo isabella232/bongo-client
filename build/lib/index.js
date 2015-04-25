@@ -1,4 +1,4 @@
-var Bongo, EventEmitter, Promise, bound_,
+var Bongo, Encoder, EventEmitter, Promise, bound_,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice,
@@ -9,6 +9,8 @@ Promise = require('bluebird');
 EventEmitter = require('microemitter');
 
 bound_ = require('./bound');
+
+Encoder = require('htmlencode');
 
 module.exports = Bongo = (function(_super) {
   var BATCH_CHUNK_MS, CONNECTED, CONNECTING, DISCONNECTED, EventBus, JsPath, Model, NOTCONNECTED, OpaqueType, Scrubber, Signature, Store, Traverse, addGlobalListener, createBongoName, createId, getEventChannelName, getRevivingListener, guardMethod, slice, _ref, _ref1;
@@ -317,7 +319,7 @@ module.exports = Bongo = (function(_super) {
   Bongo.prototype.revive = function(obj) {
     var bongo, hasEncoder;
     bongo = this;
-    hasEncoder = (typeof Encoder !== "undefined" && Encoder !== null ? Encoder.XSSEncode : void 0) != null;
+    hasEncoder = (Encoder != null ? Encoder.XSSEncode : void 0) != null;
     return new Traverse(obj).map(function(node) {
       var constructorName, instance, instanceId, konstructor, _ref2;
       if ((node != null ? node.bongo_ : void 0) != null) {
