@@ -10,12 +10,13 @@
     "bluebird": "^2.9.3",
     "dnode": "^1.2.0",
     "hat": "0.0.3",
+    "htmlencode": "0.0.4",
     "kd-shim-jspath": "^0.2.0",
-    "traverse": "^0.6.6",
     "koding-dnode-protocol": "git+ssh://git@github.com:koding/dnode-protocol#v0.2.0",
     "microemitter": "git+ssh://git@github.com:koding/microemitter#v0.2.0",
     "mongoop": "git+ssh://git@github.com:koding/mongoop#v0.2.0",
-    "sinkrow": "git+ssh://git@github.com:koding/sinkrow#v0.1.2"
+    "sinkrow": "git+ssh://git@github.com:koding/sinkrow#v0.1.2",
+    "traverse": "^0.6.6"
   },
   "browser": {
     "jspath": "kd-shim-jspath",
