@@ -1,6 +1,7 @@
 'use strict'
 
 EventEmitter = require 'microemitter'
+{extend}     = require './util'
 
 module.exports = class Model extends EventEmitter
   # contrib
@@ -11,7 +12,6 @@ module.exports = class Model extends EventEmitter
 
   Traverse = require 'traverse'
 
-  {extend} = require './util'
 
   @isOpaque =-> no
 
