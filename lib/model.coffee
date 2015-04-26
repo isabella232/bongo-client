@@ -1,19 +1,21 @@
 'use strict'
 
+Encoder      = require 'htmlencode'
 EventEmitter = require 'microemitter'
 {extend}     = require './util'
+Traverse     = require 'traverse'
+MongoOp      = require 'mongoop'
+JsPath       = require 'jspath'
+xssEncode    = (data) ->
+  return new Traverse(data).map (node) ->
+    return Encoder.XSSEncode node  if 'string' is typeof node
+    return node
+
 
 module.exports = class Model extends EventEmitter
-  # contrib
-  MongoOp   = require 'mongoop'
-  JsPath = require 'jspath'
 
   createId  = @createId = require 'hat'
-
-  Traverse = require 'traverse'
-
-
-  @isOpaque =-> no
+  @isOpaque = -> no
 
   @streamModels =(selector, options, callback)->
     unless 'each' of this then throw new Error """
@@ -43,27 +45,24 @@ module.exports = class Model extends EventEmitter
       index = @watchers.indexOf watcher
       @watchers.splice index, 1  if ~index
 
-  init:(data)->
-    model = @
-    model.watchers = {}
-    model.bongo_ or= {}
+  init: (data) ->
+    model           = this
+    model.watchers  = {}
+    model.bongo_  or= {}
+
     if data?
       model.set data
     unless 'instanceId' of model.bongo_
       model.bongo_.instanceId = createId()
+
     @emit 'init'
     @on 'updateInstance', (data) =>
-      if Encoder?.XSSEncode?
-        data = new Traverse(data).map (node) ->
-          return Encoder.XSSEncode node  if 'string' is typeof node
-          return node
-      @update_ data
+      @update_ xssEncode data
 
   set:(data={})->
-    model = @
+    model = this
     delete data.data
-    # model.data or= {}
-    extend model, data
+    extend model, xssEncode data
     model
 
   getFlagValue:(flagName)->

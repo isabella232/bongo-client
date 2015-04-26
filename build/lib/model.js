@@ -1,14 +1,31 @@
 'use strict';
-var EventEmitter, Model, extend,
+var Encoder, EventEmitter, JsPath, Model, MongoOp, Traverse, extend, xssEncode,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Encoder = require('htmlencode');
 
 EventEmitter = require('microemitter');
 
 extend = require('./util').extend;
 
+Traverse = require('traverse');
+
+MongoOp = require('mongoop');
+
+JsPath = require('jspath');
+
+xssEncode = function(data) {
+  return new Traverse(data).map(function(node) {
+    if ('string' === typeof node) {
+      return Encoder.XSSEncode(node);
+    }
+    return node;
+  });
+};
+
 module.exports = Model = (function(_super) {
-  var JsPath, MongoOp, Traverse, createId;
+  var createId;
 
   __extends(Model, _super);
 
@@ -16,13 +33,7 @@ module.exports = Model = (function(_super) {
     return Model.__super__.constructor.apply(this, arguments);
   }
 
-  MongoOp = require('mongoop');
-
-  JsPath = require('jspath');
-
   createId = Model.createId = require('hat');
-
-  Traverse = require('traverse');
 
   Model.isOpaque = function() {
     return false;
@@ -90,15 +101,7 @@ module.exports = Model = (function(_super) {
     this.emit('init');
     return this.on('updateInstance', (function(_this) {
       return function(data) {
-        if ((typeof Encoder !== "undefined" && Encoder !== null ? Encoder.XSSEncode : void 0) != null) {
-          data = new Traverse(data).map(function(node) {
-            if ('string' === typeof node) {
-              return Encoder.XSSEncode(node);
-            }
-            return node;
-          });
-        }
-        return _this.update_(data);
+        return _this.update_(xssEncode(data));
       };
     })(this));
   };
@@ -110,7 +113,7 @@ module.exports = Model = (function(_super) {
     }
     model = this;
     delete data.data;
-    extend(model, data);
+    extend(model, xssEncode(data));
     return model;
   };
 
@@ -127,7 +130,7 @@ module.exports = Model = (function(_super) {
     return this.unwatch("flags_." + flagName);
   };
 
-  Model.prototype.decoded = typeof Encoder !== "undefined" && Encoder !== null ? function(path) {
+  Model.prototype.decoded = Encoder != null ? function(path) {
     return Encoder.htmlDecode(this.getAt(path));
   } : Model.prototype.getAt;
 
