@@ -1,7 +1,7 @@
-Promise = require 'bluebird'
+Promise      = require 'bluebird'
 EventEmitter = require 'microemitter'
-bound_ = require './bound'
-Encoder = require 'htmlencode'
+bound_       = require './bound'
+Encoder      = require 'htmlencode'
 
 module.exports = class Bongo extends EventEmitter
 
