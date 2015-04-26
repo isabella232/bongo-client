@@ -6,6 +6,11 @@ EventEmitter = require 'microemitter'
 Traverse     = require 'traverse'
 MongoOp      = require 'mongoop'
 JsPath       = require 'jspath'
+xssEncode    = (data) ->
+  return new Traverse(data).map (node) ->
+    return Encoder.XSSEncode node  if 'string' is typeof node
+    return node
+
 
 module.exports = class Model extends EventEmitter
 
@@ -52,17 +57,12 @@ module.exports = class Model extends EventEmitter
 
     @emit 'init'
     @on 'updateInstance', (data) =>
-      if Encoder?.XSSEncode?
-        data = new Traverse(data).map (node) ->
-          return Encoder.XSSEncode node  if 'string' is typeof node
-          return node
-      @update_ data
+      @update_ xssEncode data
 
   set:(data={})->
-    model = @
+    model = this
     delete data.data
-    # model.data or= {}
-    extend model, data
+    extend model, xssEncode data
     model
 
   getFlagValue:(flagName)->
