@@ -87,7 +87,6 @@ module.exports = Bongo = (function(_super) {
     if (this.batchRequests) {
       this.setOutboundTimer();
     }
-    console.log(bound, this.bound);
     if (!this.useWebsockets) {
       this.once('ready', (function(_this) {
         return function() {
@@ -628,7 +627,6 @@ module.exports = Bongo = (function(_super) {
   Bongo.prototype.authenticateUser = function() {
     var clientId;
     clientId = this.getSessionToken();
-    console.log('authenticateUser');
     return this.send('authenticateUser', [clientId, this.bound('changeLoggedInState')]);
   };
 
