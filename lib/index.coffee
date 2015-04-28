@@ -1,7 +1,7 @@
-Promise      = require 'bluebird'
-EventEmitter = require 'microemitter'
 bound_       = require './bound'
-Encoder      = require 'htmlencode'
+Promise         = require 'bluebird'
+EventEmitter    = require 'microemitter'
+Encoder         = require 'htmlencode'
 
 module.exports = class Bongo extends EventEmitter
 
@@ -16,8 +16,9 @@ module.exports = class Bongo extends EventEmitter
 
   JsPath    = @JsPath = require 'jspath'
 
-  @dnodeProtocol = require 'dnode-protocol'
+  @dnodeProtocol          = require 'dnode-protocol'
   @dnodeProtocol.Scrubber = require './scrubber'
+  @promibackify           = require './promibackify'
 
   {Store, Scrubber} = @dnodeProtocol
 
@@ -27,7 +28,6 @@ module.exports = class Bongo extends EventEmitter
   EventBus  = @EventBus = require './eventbus'
   OpaqueType = require './opaquetype'
   Signature = require './signature'
-  @promibackify = require './promibackify'
 
   # mixin the event emitter for the AMQP broker
   Model::mixin require './eventemitter/broker'
@@ -38,7 +38,6 @@ module.exports = class Bongo extends EventEmitter
   # TODO: temporary hack
   # @KDML = require 'kdml'
 
-  {slice} = []
 
   @bound = bound_
 
@@ -46,6 +45,7 @@ module.exports = class Bongo extends EventEmitter
 
   createBongoName =(resourceName)->
     "#{createId 128}.unknown.bongo-#{resourceName}"
+  {slice}           = []
 
   constructor:(options)->
     EventEmitter this
@@ -66,8 +66,7 @@ module.exports = class Bongo extends EventEmitter
           @off 'ready'
     @setOutboundTimer()  if @batchRequests
     unless @useWebsockets
-      @once 'ready', =>
-        process.nextTick @bound 'xhrHandshake'
+      @once 'ready', => process.nextTick @bound 'xhrHandshake'
 
     @api = @createRemoteApiShims @apiDescriptor
 
@@ -450,8 +449,9 @@ module.exports = class Bongo extends EventEmitter
     if callback? then channel.once 'broker.subscribed', -> callback channel
     return channel
 
-  xhrHandshake: -> @send 'xhrHandshake', (api) =>
-    if @api
-    then @handshakeDone()
-    else @defineApi api
+  xhrHandshake: ->
+    @send 'xhrHandshake', (api) =>
+      if @api
+      then @handshakeDone()
+      else @defineApi api
 
