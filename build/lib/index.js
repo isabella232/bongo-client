@@ -1,4 +1,4 @@
-var Bongo, Encoder, EventEmitter, Promise, bound_,
+var Bongo, Encoder, EventBus, EventEmitter, JsPath, ListenerTree, Model, OpaqueType, Promise, Signature, Traverse, bound, createBongoName, createId,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice,
@@ -8,12 +8,38 @@ Promise = require('bluebird');
 
 EventEmitter = require('microemitter');
 
-bound_ = require('./bound');
-
 Encoder = require('htmlencode');
 
+Traverse = require('traverse');
+
+createId = require('hat');
+
+JsPath = require('jspath');
+
+Model = require('./model');
+
+ListenerTree = require('./listenertree');
+
+EventBus = require('./eventbus');
+
+OpaqueType = require('./opaquetype');
+
+Signature = require('./signature');
+
+bound = require('./bound');
+
+createBongoName = function(resourceName) {
+  return "" + (createId(128)) + ".unknown.bongo-" + resourceName;
+};
+
+(function() {
+  Model.prototype.mixin(require('./eventemitter/broker'));
+  Model.prototype.off = Model.prototype.removeListener;
+  return Model.prototype.addGlobalListener = Model.prototype.on;
+})();
+
 module.exports = Bongo = (function(_super) {
-  var BATCH_CHUNK_MS, CONNECTED, CONNECTING, DISCONNECTED, EventBus, JsPath, Model, NOTCONNECTED, OpaqueType, Scrubber, Signature, Store, Traverse, addGlobalListener, createBongoName, createId, getEventChannelName, getRevivingListener, guardMethod, slice, _ref, _ref1;
+  var BATCH_CHUNK_MS, CONNECTED, CONNECTING, DISCONNECTED, NOTCONNECTED, Scrubber, Store, addGlobalListener, getEventChannelName, getRevivingListener, guardMethod, slice, _ref, _ref1;
 
   __extends(Bongo, _super);
 
@@ -21,47 +47,15 @@ module.exports = Bongo = (function(_super) {
 
   BATCH_CHUNK_MS = 300;
 
-  Traverse = require('traverse');
-
-  createId = Bongo.createId = require('hat');
-
-  JsPath = Bongo.JsPath = require('jspath');
-
   Bongo.dnodeProtocol = require('dnode-protocol');
 
   Bongo.dnodeProtocol.Scrubber = require('./scrubber');
 
-  _ref1 = Bongo.dnodeProtocol, Store = _ref1.Store, Scrubber = _ref1.Scrubber;
-
-  Bongo.EventEmitter = EventEmitter;
-
-  Model = Bongo.Model = require('./model');
-
-  Bongo.ListenerTree = require('./listenertree');
-
-  EventBus = Bongo.EventBus = require('./eventbus');
-
-  OpaqueType = require('./opaquetype');
-
-  Signature = require('./signature');
-
   Bongo.promibackify = require('./promibackify');
 
-  Model.prototype.mixin(require('./eventemitter/broker'));
-
-  Model.prototype.off = Model.prototype.removeListener;
-
-  Model.prototype.addGlobalListener = Model.prototype.on;
+  _ref1 = Bongo.dnodeProtocol, Store = _ref1.Store, Scrubber = _ref1.Scrubber;
 
   slice = [].slice;
-
-  Bongo.bound = bound_;
-
-  Bongo.prototype.bound = bound_;
-
-  createBongoName = function(resourceName) {
-    return "" + (createId(128)) + ".unknown.bongo-" + resourceName;
-  };
 
   function Bongo(options) {
     EventEmitter(this);
@@ -93,6 +87,7 @@ module.exports = Bongo = (function(_super) {
     if (this.batchRequests) {
       this.setOutboundTimer();
     }
+    console.log(bound, this.bound);
     if (!this.useWebsockets) {
       this.once('ready', (function(_this) {
         return function() {
@@ -112,6 +107,8 @@ module.exports = Bongo = (function(_super) {
       })(this));
     }
   }
+
+  Bongo.prototype.bound = bound;
 
   Bongo.prototype.isConnected = function() {
     return this.readyState === CONNECTED;
@@ -631,6 +628,7 @@ module.exports = Bongo = (function(_super) {
   Bongo.prototype.authenticateUser = function() {
     var clientId;
     clientId = this.getSessionToken();
+    console.log('authenticateUser');
     return this.send('authenticateUser', [clientId, this.bound('changeLoggedInState')]);
   };
 

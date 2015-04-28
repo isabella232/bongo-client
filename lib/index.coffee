@@ -1,51 +1,35 @@
-Promise      = require 'bluebird'
-EventEmitter = require 'microemitter'
-bound_       = require './bound'
-Encoder      = require 'htmlencode'
+Promise         = require 'bluebird'
+EventEmitter    = require 'microemitter'
+Encoder         = require 'htmlencode'
+Traverse        = require 'traverse'
+createId        = require 'hat'
+JsPath          = require 'jspath'
+Model           = require './model'
+ListenerTree    = require './listenertree'
+EventBus        = require './eventbus'
+OpaqueType      = require './opaquetype'
+Signature       = require './signature'
+bound           = require './bound'
+createBongoName = (resourceName) -> "#{createId 128}.unknown.bongo-#{resourceName}"
+
+do ->
+  # mixin the event emitter for the AMQP broker
+  Model::mixin require './eventemitter/broker'
+  # need these aliases:
+  Model::off               = Model::removeListener
+  Model::addGlobalListener = Model::on
 
 module.exports = class Bongo extends EventEmitter
 
   [NOTCONNECTED, CONNECTING, CONNECTED, DISCONNECTED] = [0,1,2,3]
-
   BATCH_CHUNK_MS = 300
 
-  # bongo     = new EventEmitter
-  # contrib
-  Traverse  = require 'traverse'
-  createId  = @createId = require 'hat'
-
-  JsPath    = @JsPath = require 'jspath'
-
-  @dnodeProtocol = require 'dnode-protocol'
+  @dnodeProtocol          = require 'dnode-protocol'
   @dnodeProtocol.Scrubber = require './scrubber'
+  @promibackify           = require './promibackify'
 
   {Store, Scrubber} = @dnodeProtocol
-
-  @EventEmitter = EventEmitter
-  Model = @Model = require './model'
-  @ListenerTree = require './listenertree'
-  EventBus  = @EventBus = require './eventbus'
-  OpaqueType = require './opaquetype'
-  Signature = require './signature'
-  @promibackify = require './promibackify'
-
-  # mixin the event emitter for the AMQP broker
-  Model::mixin require './eventemitter/broker'
-  # need these aliases:
-  Model::off = Model::removeListener
-  Model::addGlobalListener = Model::on
-
-  # TODO: temporary hack
-  # @KDML = require 'kdml'
-
-  {slice} = []
-
-  @bound = bound_
-
-  bound: bound_
-
-  createBongoName =(resourceName)->
-    "#{createId 128}.unknown.bongo-#{resourceName}"
+  {slice}           = []
 
   constructor:(options)->
     EventEmitter this
@@ -66,8 +50,7 @@ module.exports = class Bongo extends EventEmitter
           @off 'ready'
     @setOutboundTimer()  if @batchRequests
     unless @useWebsockets
-      @once 'ready', =>
-        process.nextTick @bound 'xhrHandshake'
+      @once 'ready', => process.nextTick @bound 'xhrHandshake'
 
     @api = @createRemoteApiShims @apiDescriptor
 
@@ -77,6 +60,8 @@ module.exports = class Bongo extends EventEmitter
         @disconnectedAt = Date.now()
         @emit 'disconnected'
         @readyState = DISCONNECTED
+
+  bound : bound
 
   isConnected: -> return @readyState is CONNECTED
 
@@ -450,8 +435,9 @@ module.exports = class Bongo extends EventEmitter
     if callback? then channel.once 'broker.subscribed', -> callback channel
     return channel
 
-  xhrHandshake: -> @send 'xhrHandshake', (api) =>
-    if @api
-    then @handshakeDone()
-    else @defineApi api
+  xhrHandshake: ->
+    @send 'xhrHandshake', (api) =>
+      if @api
+      then @handshakeDone()
+      else @defineApi api
 
