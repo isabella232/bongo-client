@@ -386,7 +386,12 @@ module.exports = class Bongo extends EventEmitter
 
       return  if xhr.status not in [200, 304]
 
-      requests = JSON.parse xhr.response
+      try
+        requests = JSON.parse xhr.response
+      catch e
+        message = "XHR Error: could not parse response #{xhr.response}"
+        @emit 'error', new Error message
+        return
 
       @handleRequest request for request in requests when request
     messageString = JSON.stringify { @channelName, queue }
