@@ -440,4 +440,3 @@ module.exports = class Bongo extends EventEmitter
       if @api
       then @handshakeDone()
       else @defineApi api
-
