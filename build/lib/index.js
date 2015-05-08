@@ -88,11 +88,7 @@ module.exports = Bongo = (function(_super) {
       this.setOutboundTimer();
     }
     if (!this.useWebsockets) {
-      this.once('ready', (function(_this) {
-        return function() {
-          return process.nextTick(_this.bound('xhrHandshake'));
-        };
-      })(this));
+      this.xhrHandshake();
     }
     this.api = this.createRemoteApiShims(this.apiDescriptor);
     if (this.mq != null) {
@@ -408,9 +404,9 @@ module.exports = Bongo = (function(_super) {
   Bongo.prototype.reconnectHelper = function() {
     return this.mq.ready((function(_this) {
       return function() {
-        _this.authenticateUser();
         _this.readyState = CONNECTED;
-        return _this.emit('ready');
+        _this.emit('ready');
+        return _this.authenticateUser();
       };
     })(this));
   };
@@ -534,9 +530,6 @@ module.exports = Bongo = (function(_super) {
     if (!Array.isArray(args)) {
       args = [args];
     }
-    if ((this.mq != null) && !this.channel) {
-      throw new Error('No channel!');
-    }
     scrubber = new Scrubber(this.localStore);
     return scrubber.scrub(args, (function(_this) {
       return function() {
@@ -545,7 +538,9 @@ module.exports = Bongo = (function(_super) {
         message.method = method;
         message.sessionToken = _this.getSessionToken();
         message.userArea = _this.getUserArea();
-        return _this.sendHelper(message);
+        return _this.once('ready', function() {
+          return _this.sendHelper(message);
+        });
       };
     })(this));
   };
@@ -553,6 +548,9 @@ module.exports = Bongo = (function(_super) {
   Bongo.prototype.sendHelper = function(message) {
     var konstructor, messageString;
     if (this.useWebsockets) {
+      if ((this.mq != null) && !this.channel) {
+        throw new Error('No channel!');
+      }
       messageString = JSON.stringify(message);
       if (this.channel.isOpen) {
         return this.channel.publish(messageString);
@@ -574,8 +572,9 @@ module.exports = Bongo = (function(_super) {
     this.outboundQueue = [];
     return this.outboundTimer = setInterval((function(_this) {
       return function() {
-        if (_this.outboundQueue.length) {
-          _this.sendXhr(_this.apiEndpoint, 'POST', _this.outboundQueue);
+        var messages;
+        if ((messages = _this.outboundQueue.splice(0)).length) {
+          _this.sendXhr(_this.apiEndpoint, 'POST', messages);
         }
         return _this.outboundQueue.length = 0;
       };
@@ -593,20 +592,27 @@ module.exports = Bongo = (function(_super) {
     xhr.setRequestHeader("Content-type", "application/json;charset=UTF-8");
     xhr.onreadystatechange = (function(_this) {
       return function() {
-        var request, requests, _i, _len, _ref2, _results;
-        if (xhr.status === 0) {
+        var e, message, request, requests, _i, _len, _ref2, _results;
+        if (xhr.readyState === 0) {
           return;
-        }
-        if (xhr.status >= 400) {
-          _this.emit('error', new Error("XHR Error: " + xhr.status));
         }
         if (xhr.readyState !== 4) {
           return;
         }
+        if (xhr.status >= 400) {
+          _this.emit('error', new Error("XHR Error: " + (JSON.stringify(xhr.status))));
+        }
         if ((_ref2 = xhr.status) !== 200 && _ref2 !== 304) {
           return;
         }
-        requests = JSON.parse(xhr.response);
+        try {
+          requests = JSON.parse(xhr.response);
+        } catch (_error) {
+          e = _error;
+          message = "XHR Error: could not parse response " + xhr.response;
+          _this.emit('error', new Error(message));
+          return;
+        }
         _results = [];
         for (_i = 0, _len = requests.length; _i < _len; _i++) {
           request = requests[_i];

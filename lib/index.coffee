@@ -48,9 +48,10 @@ module.exports = class Bongo extends EventEmitter
         process.nextTick =>
           @emit 'ready'
           @off 'ready'
+
     @setOutboundTimer()  if @batchRequests
-    unless @useWebsockets
-      @once 'ready', => process.nextTick @bound 'xhrHandshake'
+
+    @xhrHandshake()  unless @useWebsockets
 
     @api = @createRemoteApiShims @apiDescriptor
 
@@ -249,9 +250,9 @@ module.exports = class Bongo extends EventEmitter
 
   reconnectHelper:->
     @mq.ready =>
-      @authenticateUser()
       @readyState = CONNECTED
       @emit 'ready'
+      @authenticateUser()
 
   connectHelper:(callback)->
     @mq.once 'connected', =>
@@ -335,19 +336,22 @@ module.exports = class Bongo extends EventEmitter
   send:(method, args)->
     args = [args] unless Array.isArray args
 
-    if @mq? and not @channel
-      throw new Error 'No channel!'
-
     scrubber = new Scrubber @localStore
     scrubber.scrub args, =>
       message = scrubber.toDnodeProtocol()
       message.method = method
       message.sessionToken = @getSessionToken()
       message.userArea = @getUserArea()
-      @sendHelper message
+
+      @once 'ready', =>
+        @sendHelper message
 
   sendHelper: (message) ->
     if @useWebsockets
+
+      if @mq? and not @channel
+        throw new Error 'No channel!'
+
       messageString = JSON.stringify message
       if @channel.isOpen
         @channel.publish messageString
@@ -364,8 +368,8 @@ module.exports = class Bongo extends EventEmitter
   setOutboundTimer: ->
     @outboundQueue = []
     @outboundTimer = setInterval =>
-      if @outboundQueue.length
-        @sendXhr @apiEndpoint, 'POST', @outboundQueue
+      if (messages = @outboundQueue.splice 0).length
+        @sendXhr @apiEndpoint, 'POST', messages
       @outboundQueue.length = 0
     , BATCH_CHUNK_MS
 
@@ -377,15 +381,21 @@ module.exports = class Bongo extends EventEmitter
     xhr.open method, url
     xhr.setRequestHeader "Content-type", "application/json;charset=UTF-8"
     xhr.onreadystatechange = =>
-      if xhr.status is 0
-        return # TODO: try again with backoff
-      if xhr.status >= 400
-        @emit 'error', new Error "XHR Error: #{ xhr.status }"
 
-      return  if xhr.readyState isnt 4
+      return  if xhr.readyState is 0   # 0: UNSENT
+      return  if xhr.readyState isnt 4 # 4: DONE
+
+      if xhr.status >= 400
+        @emit 'error', new Error "XHR Error: #{JSON.stringify xhr.status}"
+
       return  if xhr.status not in [200, 304]
 
-      requests = JSON.parse xhr.response
+      try
+        requests = JSON.parse xhr.response
+      catch e
+        message = "XHR Error: could not parse response #{xhr.response}"
+        @emit 'error', new Error message
+        return
 
       @handleRequest request for request in requests when request
     messageString = JSON.stringify { @channelName, queue }
@@ -440,4 +450,3 @@ module.exports = class Bongo extends EventEmitter
       if @api
       then @handshakeDone()
       else @defineApi api
-
