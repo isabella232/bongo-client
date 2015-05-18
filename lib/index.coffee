@@ -256,7 +256,6 @@ module.exports = class Bongo extends EventEmitter
 
   connectHelper:(callback)->
     @mq.once 'connected', =>
-      @emit 'ready'
       callback?()
 
     @channelName = createBongoName @resourceName
