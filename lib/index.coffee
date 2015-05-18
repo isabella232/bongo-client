@@ -311,7 +311,7 @@ module.exports = class Bongo extends EventEmitter
 
   bindAutoreconnect: ->
 
-    @mq.once 'disconnected', =>
+    @mq.on 'disconnected', =>
 
       @mq.once 'connected', @bound 'reconnectHelper'
 
