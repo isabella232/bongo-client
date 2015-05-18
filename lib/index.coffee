@@ -297,11 +297,9 @@ module.exports = class Bongo extends EventEmitter
       when CONNECTED, CONNECTING then return "already connected"
       when DISCONNECTED
         @readyState = CONNECTING
+        @reconnectHelper()
+        @mq.once 'connected', callback  if callback
         @mq.connect()
-        if callback?
-          @mq.on 'connected', =>
-            @emit 'ready'
-            callback null
       else
         @readyState = CONNECTING
         @connectHelper callback
