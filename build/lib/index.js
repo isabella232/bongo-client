@@ -412,12 +412,9 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.connectHelper = function(callback) {
-    this.mq.once('connected', (function(_this) {
-      return function() {
-        _this.emit('ready');
-        return typeof callback === "function" ? callback() : void 0;
-      };
-    })(this));
+    if (callback) {
+      this.mq.once('connected', callback);
+    }
     this.channelName = createBongoName(this.resourceName);
     this.channel = this.mq.subscribe(this.channelName, {
       connectDirectly: true
@@ -465,29 +462,27 @@ module.exports = Bongo = (function(_super) {
         return "already connected";
       case DISCONNECTED:
         this.readyState = CONNECTING;
-        this.mq.connect();
-        if (callback != null) {
-          this.mq.on('connected', (function(_this) {
-            return function() {
-              _this.emit('ready');
-              return callback(null);
-            };
-          })(this));
+        this.reconnectHelper();
+        if (callback) {
+          this.mq.once('connected', callback);
         }
+        this.mq.connect();
         break;
       default:
         this.readyState = CONNECTING;
         this.connectHelper(callback);
     }
     if (this.mq.autoReconnect) {
-      return this.mq.once('disconnected', (function(_this) {
-        return function() {
-          return _this.mq.once('connected', function() {
-            return _this.reconnectHelper();
-          });
-        };
-      })(this));
+      return this.bindAutoreconnect();
     }
+  };
+
+  Bongo.prototype.bindAutoreconnect = function() {
+    return this.mq.on('disconnected', (function(_this) {
+      return function() {
+        return _this.mq.once('connected', _this.bound('reconnectHelper'));
+      };
+    })(this));
   };
 
   Bongo.prototype.disconnect = function(shouldReconnect, callback) {
@@ -538,9 +533,7 @@ module.exports = Bongo = (function(_super) {
         message.method = method;
         message.sessionToken = _this.getSessionToken();
         message.userArea = _this.getUserArea();
-        return _this.once('ready', function() {
-          return _this.sendHelper(message);
-        });
+        return _this.sendHelper(message);
       };
     })(this));
   };
