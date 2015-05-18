@@ -306,8 +306,15 @@ module.exports = class Bongo extends EventEmitter
         @readyState = CONNECTING
         @connectHelper callback
 
-    if @mq.autoReconnect
-      @mq.once 'disconnected', => @mq.once 'connected', => @reconnectHelper()
+    @bindAutoreconnect()  if @mq.autoReconnect
+
+
+  bindAutoreconnect: ->
+
+    @mq.once 'disconnected', =>
+
+      @mq.once 'connected', @bound 'reconnectHelper'
+
 
   disconnect:(shouldReconnect, callback)->
     # @channel.close().off()  if @channel?
