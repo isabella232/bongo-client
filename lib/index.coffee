@@ -347,8 +347,7 @@ module.exports = class Bongo extends EventEmitter
       message.sessionToken = @getSessionToken()
       message.userArea = @getUserArea()
 
-      @once 'ready', =>
-        @sendHelper message
+      @sendHelper message
 
   sendHelper: (message) ->
     if @useWebsockets
