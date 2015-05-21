@@ -254,10 +254,10 @@ module.exports = class Bongo extends EventEmitter
       @emit 'ready'
       @authenticateUser()
 
-  connectHelper:(callback)->
-    @mq.once 'connected', =>
-      @emit 'ready'
-      callback?()
+
+  connectHelper: (callback) ->
+
+    @mq.once 'connected', callback  if callback
 
     @channelName = createBongoName @resourceName
 
@@ -297,17 +297,22 @@ module.exports = class Bongo extends EventEmitter
       when CONNECTED, CONNECTING then return "already connected"
       when DISCONNECTED
         @readyState = CONNECTING
+        @reconnectHelper()
+        @mq.once 'connected', callback  if callback
         @mq.connect()
-        if callback?
-          @mq.on 'connected', =>
-            @emit 'ready'
-            callback null
       else
         @readyState = CONNECTING
         @connectHelper callback
 
-    if @mq.autoReconnect
-      @mq.once 'disconnected', => @mq.once 'connected', => @reconnectHelper()
+    @bindAutoreconnect()  if @mq.autoReconnect
+
+
+  bindAutoreconnect: ->
+
+    @mq.on 'disconnected', =>
+
+      @mq.once 'connected', @bound 'reconnectHelper'
+
 
   disconnect:(shouldReconnect, callback)->
     # @channel.close().off()  if @channel?
@@ -343,8 +348,7 @@ module.exports = class Bongo extends EventEmitter
       message.sessionToken = @getSessionToken()
       message.userArea = @getUserArea()
 
-      @once 'ready', =>
-        @sendHelper message
+      @sendHelper message
 
   sendHelper: (message) ->
     if @useWebsockets
