@@ -345,9 +345,6 @@ module.exports = class Bongo extends EventEmitter
     scrubber.scrub args, =>
       message = scrubber.toDnodeProtocol()
       message.method = method
-      message.sessionToken = @getSessionToken()
-      message.userArea = @getUserArea()
-
       @sendHelper message
 
   sendHelper: (message) ->
@@ -402,8 +399,15 @@ module.exports = class Bongo extends EventEmitter
         return
 
       @handleRequest request for request in requests when request
-    messageString = JSON.stringify { @channelName, queue }
-    xhr.send messageString
+
+    payload = JSON.stringify {
+      @channelName
+      queue
+      sessionToken: @getSessionToken()
+      userArea: @getUserArea()
+    }
+
+    xhr.send payload
 
   authenticateUser:->
     clientId = @getSessionToken()
