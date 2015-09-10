@@ -531,8 +531,6 @@ module.exports = Bongo = (function(_super) {
         var message;
         message = scrubber.toDnodeProtocol();
         message.method = method;
-        message.sessionToken = _this.getSessionToken();
-        message.userArea = _this.getUserArea();
         return _this.sendHelper(message);
       };
     })(this));
@@ -579,7 +577,7 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.sendXhr = function(url, method, queue) {
-    var messageString, xhr;
+    var payload, xhr;
     xhr = new XMLHttpRequest;
     xhr.open(method, url);
     xhr.setRequestHeader("Content-type", "application/json;charset=UTF-8");
@@ -616,11 +614,13 @@ module.exports = Bongo = (function(_super) {
         return _results;
       };
     })(this);
-    messageString = JSON.stringify({
+    payload = JSON.stringify({
       channelName: this.channelName,
-      queue: queue
+      queue: queue,
+      sessionToken: this.getSessionToken(),
+      userArea: this.getUserArea()
     });
-    return xhr.send(messageString);
+    return xhr.send(payload);
   };
 
   Bongo.prototype.authenticateUser = function() {
