@@ -387,7 +387,7 @@ module.exports = class Bongo extends EventEmitter
       return  if xhr.readyState isnt 4 # 4: DONE
 
       if xhr.status >= 400
-        @emit 'error', new Error "XHR Error: #{JSON.stringify xhr.status}"
+        return console.error "XHR Error: #{JSON.stringify xhr.status}", queue
 
       return  if xhr.status not in [200, 304]
 
