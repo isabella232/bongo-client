@@ -1,6 +1,6 @@
 {
   "name": "@koding/bongo-client",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "main": "build/lib/index.js",
   "scripts": {
     "prepublish": "make all"

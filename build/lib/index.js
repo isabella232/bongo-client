@@ -591,7 +591,7 @@ module.exports = Bongo = (function(_super) {
           return;
         }
         if (xhr.status >= 400) {
-          _this.emit('error', new Error("XHR Error: " + (JSON.stringify(xhr.status))));
+          return console.error("XHR Error: " + (JSON.stringify(xhr.status)), queue);
         }
         if ((_ref2 = xhr.status) !== 200 && _ref2 !== 304) {
           return;
