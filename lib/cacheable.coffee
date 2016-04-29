@@ -61,4 +61,3 @@ handleBatch =(batch, callback)->
         queue.fin()
   sinkrow.dash queue, -> callback null, models
   return
-

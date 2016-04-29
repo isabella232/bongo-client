@@ -9,4 +9,3 @@ module.exports = (method) ->
   )
 
   return @[boundMethod]
-

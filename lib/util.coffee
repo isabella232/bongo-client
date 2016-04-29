@@ -14,4 +14,3 @@ asynchronizeOwnMethods = (ofObject)->
   result
 
 module.exports = { extend, asynchronizeOwnMethods }
-
