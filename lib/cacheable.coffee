@@ -1,4 +1,5 @@
-sinkrow = require 'sinkrow'
+async = require 'async'
+
 ModelLoader = require './modelloader'
 
 
@@ -54,12 +55,12 @@ handleBatch = (batch, callback) ->
 
   models = []
 
-  queue = batch.map (single, i) =>=>
+  queue = batch.map (single, i) => (done) =>
     {name, type, constructorName, id} = single
     handleSingle.call this, type or name or constructorName, id, (err, model) ->
       if err then callback err
       else
         models[i] = model
-        queue.fin()
-  sinkrow.dash queue, -> callback null, models
-  return
+        done()
+
+  async.parallel queue, -> callback null, models
