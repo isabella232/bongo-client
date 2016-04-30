@@ -5,9 +5,9 @@ ModelLoader = require './modelloader'
 module.exports = ->
   switch arguments.length
     when 2
-      handleBatch.apply @, arguments
+      handleBatch.apply this, arguments
     when 3
-      handleSingle.apply @, arguments
+      handleSingle.apply this, arguments
     else
       throw new Error 'Bongo#cacheable expects either 2 or 3 arguments.'
 
@@ -49,12 +49,14 @@ handleSingle =(constructorName, _id, callback)->
   return
 
 
-handleBatch =(batch, callback)->
-  return handleByName.call @, batch, callback  if 'string' is typeof batch
+handleBatch = (batch, callback) ->
+  return handleByName.call this, batch, callback  if 'string' is typeof batch
+
   models = []
-  queue = batch.map (single, i)=>=>
+
+  queue = batch.map (single, i) =>=>
     {name, type, constructorName, id} = single
-    handleSingle.call @, type or name or constructorName, id, (err, model)->
+    handleSingle.call this, type or name or constructorName, id, (err, model) ->
       if err then callback err
       else
         models[i] = model
