@@ -1,14 +1,14 @@
 var BongoScrubber, Scrubber,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __slice = [].slice;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  slice = [].slice;
 
 Scrubber = require('dnode-protocol').Scrubber;
 
-module.exports = BongoScrubber = (function(_super) {
+module.exports = BongoScrubber = (function(superClass) {
   var compensateForLatency, createFailHandler, error, noop;
 
-  __extends(BongoScrubber, _super);
+  extend(BongoScrubber, superClass);
 
   noop = function() {};
 
@@ -19,7 +19,7 @@ module.exports = BongoScrubber = (function(_super) {
   createFailHandler = function(fn) {
     return function() {
       var err, rest;
-      rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      rest = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       err = rest[0];
       if (err != null) {
         return fn.apply(null, rest);

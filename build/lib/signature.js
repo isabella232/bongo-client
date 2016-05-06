@@ -1,5 +1,5 @@
 var Rest, Signature,
-  __slice = [].slice;
+  slice = [].slice;
 
 Rest = require('./rest');
 
@@ -11,14 +11,14 @@ module.exports = Signature = (function() {
   restRe = /^R\((.)\)$/;
 
   function Signature(signatureStr) {
-    var i, rest, type, _i, _len, _ref;
+    var i, j, len, ref, rest, type;
     if (!(this instanceof Signature)) {
       return new Signature(signatureStr);
     }
     this.paramTypes = (signatureStr.split(',')).map(interpretType);
-    _ref = this.paramTypes;
-    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-      type = _ref[i];
+    ref = this.paramTypes;
+    for (i = j = 0, len = ref.length; j < len; i = ++j) {
+      type = ref[i];
       if (!type.isRest) {
         continue;
       }
@@ -39,7 +39,7 @@ module.exports = Signature = (function() {
 
   Signature.prototype.spread = function() {
     var rest;
-    rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    rest = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     return this.test(rest);
   };
 
@@ -55,13 +55,13 @@ module.exports = Signature = (function() {
   };
 
   Signature.prototype.testEach = function(params, types) {
-    var i, param, _i, _len, _ref;
+    var i, j, len, param, ref;
     if (types == null) {
       types = this.paramTypes;
     }
-    for (i = _i = 0, _len = params.length; _i < _len; i = ++_i) {
+    for (i = j = 0, len = params.length; j < len; i = ++j) {
       param = params[i];
-      if (!this.testType(param, (_ref = types[i]) != null ? _ref : types.tag)) {
+      if (!this.testType(param, (ref = types[i]) != null ? ref : types.tag)) {
         return false;
       }
     }
@@ -96,7 +96,7 @@ module.exports = Signature = (function() {
   };
 
   Signature.prototype.testType = function(param, type) {
-    var p, _i, _len;
+    var j, len, p;
     switch (false) {
       case !(param === null || param === void 0):
         return true;
@@ -114,8 +114,8 @@ module.exports = Signature = (function() {
         if (!Array.isArray(param)) {
           return false;
         }
-        for (_i = 0, _len = param.length; _i < _len; _i++) {
-          p = param[_i];
+        for (j = 0, len = param.length; j < len; j++) {
+          p = param[j];
           if (!this.testType(p, type[0])) {
             return false;
           }
@@ -127,7 +127,7 @@ module.exports = Signature = (function() {
   };
 
   interpretType = function(typeStr) {
-    var arrType, m, restType, _;
+    var _, arrType, m, restType;
     switch (false) {
       case typeStr !== 'O':
         return Object;

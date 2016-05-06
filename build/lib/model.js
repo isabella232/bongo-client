@@ -1,7 +1,7 @@
 'use strict';
 var Encoder, EventEmitter, JsPath, Model, MongoOp, Traverse, extend, xssEncode,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend1 = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Encoder = require('htmlencode');
 
@@ -24,10 +24,10 @@ xssEncode = function(data) {
   });
 };
 
-module.exports = Model = (function(_super) {
+module.exports = Model = (function(superClass) {
   var createId;
 
-  __extends(Model, _super);
+  extend1(Model, superClass);
 
   function Model() {
     return Model.__super__.constructor.apply(this, arguments);
@@ -58,20 +58,20 @@ module.exports = Model = (function(_super) {
   };
 
   Model.prototype.mixin = Model.mixin = function(source) {
-    var key, val, _results;
-    _results = [];
+    var key, results, val;
+    results = [];
     for (key in source) {
       val = source[key];
       if (key !== 'constructor') {
-        _results.push(this[key] = val);
+        results.push(this[key] = val);
       }
     }
-    return _results;
+    return results;
   };
 
   Model.prototype.watch = function(field, watcher) {
-    var _base;
-    (_base = this.watchers)[field] || (_base[field] = []);
+    var base;
+    (base = this.watchers)[field] || (base[field] = []);
     return this.watchers[field].push(watcher);
   };
 
@@ -118,8 +118,8 @@ module.exports = Model = (function(_super) {
   };
 
   Model.prototype.getFlagValue = function(flagName) {
-    var _ref;
-    return (_ref = this.flags_) != null ? _ref[flagName] : void 0;
+    var ref;
+    return (ref = this.flags_) != null ? ref[flagName] : void 0;
   };
 
   Model.prototype.watchFlagValue = function(flagName, callback) {
@@ -169,8 +169,8 @@ module.exports = Model = (function(_super) {
   };
 
   Model.prototype.valueOf = function() {
-    var _ref;
-    return (_ref = typeof this.getValue === "function" ? this.getValue() : void 0) != null ? _ref : this;
+    var ref;
+    return (ref = typeof this.getValue === "function" ? this.getValue() : void 0) != null ? ref : this;
   };
 
   Model.prototype.save = function(callback) {
@@ -192,8 +192,8 @@ module.exports = Model = (function(_super) {
     fields = new MongoOp(data).applyTo(this);
     Object.keys(fields).forEach((function(_this) {
       return function(field) {
-        var _ref;
-        return (_ref = _this.watchers[field]) != null ? _ref.forEach(function(watcher) {
+        var ref;
+        return (ref = _this.watchers[field]) != null ? ref.forEach(function(watcher) {
           return watcher.call(_this, fields[field]);
         }) : void 0;
       };

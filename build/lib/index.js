@@ -1,8 +1,8 @@
 var Bongo, Encoder, EventBus, EventEmitter, JsPath, ListenerTree, Model, OpaqueType, Promise, Signature, Traverse, bound, createBongoName, createId,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __slice = [].slice,
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  slice1 = [].slice,
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 Promise = require('bluebird');
 
@@ -29,7 +29,7 @@ Signature = require('./signature');
 bound = require('./bound');
 
 createBongoName = function(resourceName) {
-  return "" + (createId(128)) + ".unknown.bongo-" + resourceName;
+  return (createId(128)) + ".unknown.bongo-" + resourceName;
 };
 
 (function() {
@@ -38,12 +38,12 @@ createBongoName = function(resourceName) {
   return Model.prototype.addGlobalListener = Model.prototype.on;
 })();
 
-module.exports = Bongo = (function(_super) {
-  var BATCH_CHUNK_MS, CONNECTED, CONNECTING, DISCONNECTED, NOTCONNECTED, Scrubber, Store, addGlobalListener, getEventChannelName, getRevivingListener, guardMethod, slice, _ref, _ref1;
+module.exports = Bongo = (function(superClass) {
+  var BATCH_CHUNK_MS, CONNECTED, CONNECTING, DISCONNECTED, NOTCONNECTED, Scrubber, Store, addGlobalListener, getEventChannelName, getRevivingListener, guardMethod, ref, ref1, slice;
 
-  __extends(Bongo, _super);
+  extend(Bongo, superClass);
 
-  _ref = [0, 1, 2, 3], NOTCONNECTED = _ref[0], CONNECTING = _ref[1], CONNECTED = _ref[2], DISCONNECTED = _ref[3];
+  ref = [0, 1, 2, 3], NOTCONNECTED = ref[0], CONNECTING = ref[1], CONNECTED = ref[2], DISCONNECTED = ref[3];
 
   BATCH_CHUNK_MS = 300;
 
@@ -53,7 +53,7 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.promibackify = require('./promibackify');
 
-  _ref1 = Bongo.dnodeProtocol, Store = _ref1.Store, Scrubber = _ref1.Scrubber;
+  ref1 = Bongo.dnodeProtocol, Store = ref1.Store, Scrubber = ref1.Scrubber;
 
   slice = [].slice;
 
@@ -113,10 +113,10 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.cacheableAsync = function() {
     var rest;
-    rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    rest = 1 <= arguments.length ? slice1.call(arguments, 0) : [];
     return new Promise((function(_this) {
       return function(resolve, reject) {
-        return _this.cacheable.apply(_this, __slice.call(rest).concat([function(err, model) {
+        return _this.cacheable.apply(_this, slice1.call(rest).concat([function(err, model) {
           if (err) {
             return reject(err);
           }
@@ -127,11 +127,11 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.createRemoteApiShims = function(api) {
-    var attributes, instance, name, shimmedApi, statik, _ref2;
+    var attributes, instance, name, ref2, shimmedApi, statik;
     shimmedApi = {};
     for (name in api) {
-      if (!__hasProp.call(api, name)) continue;
-      _ref2 = api[name], statik = _ref2.statik, instance = _ref2.instance, attributes = _ref2.attributes;
+      if (!hasProp.call(api, name)) continue;
+      ref2 = api[name], statik = ref2.statik, instance = ref2.instance, attributes = ref2.attributes;
       shimmedApi[name] = this.createConstructor(name, statik, instance, attributes);
     }
     return shimmedApi;
@@ -139,10 +139,10 @@ module.exports = Bongo = (function(_super) {
 
   guardMethod = function(signatures, fn) {
     return function() {
-      var rest, signature, _i, _len;
-      rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      for (_i = 0, _len = signatures.length; _i < _len; _i++) {
-        signature = signatures[_i];
+      var i, len, rest, signature;
+      rest = 1 <= arguments.length ? slice1.call(arguments, 0) : [];
+      for (i = 0, len = signatures.length; i < len; i++) {
+        signature = signatures[i];
         if (signature.test(rest)) {
           return fn.apply(this, rest);
         }
@@ -160,12 +160,12 @@ module.exports = Bongo = (function(_super) {
       return (Object.keys(methods)).forEach(function(method) {
         var signatures, wrapper;
         signatures = methods[method].map(Signature);
-        if (__indexOf.call(optimizeThese, method) >= 0) {
+        if (indexOf.call(optimizeThese, method) >= 0) {
           method += '_';
         }
         wrapper = guardMethod(signatures, function() {
           var rest, rpc;
-          rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          rest = 1 <= arguments.length ? slice1.call(arguments, 0) : [];
           rpc = {
             type: 'static',
             constructorName: constructorName,
@@ -188,12 +188,12 @@ module.exports = Bongo = (function(_super) {
       return (Object.keys(methods)).forEach(function(method) {
         var signatures, wrapper;
         signatures = methods[method].map(Signature);
-        if (__indexOf.call(optimizeThese, method) >= 0) {
+        if (indexOf.call(optimizeThese, method) >= 0) {
           method += '_';
         }
         wrapper = guardMethod(signatures, function() {
           var data, id, rest, rpc;
-          rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          rest = 1 <= arguments.length ? slice1.call(arguments, 0) : [];
           id = this.getId();
           if (id == null) {
             data = this.data;
@@ -233,7 +233,7 @@ module.exports = Bongo = (function(_super) {
   getRevivingListener = function(bongo, ctx, listener) {
     return function() {
       var rest;
-      rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      rest = 1 <= arguments.length ? slice1.call(arguments, 0) : [];
       return listener.apply(ctx, bongo.revive(rest));
     };
   };
@@ -242,7 +242,7 @@ module.exports = Bongo = (function(_super) {
     return this.eventBus.staticOn(konstructor, event, (function(_this) {
       return function() {
         var rest, revived;
-        rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        rest = 1 <= arguments.length ? slice1.call(arguments, 0) : [];
         revived = _this.revive(rest);
         return listener.apply(konstructor, revived);
       };
@@ -250,14 +250,14 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.reviveType = function(type, shouldWrap) {
-    var revived, _base, _ref2, _ref3;
+    var base, ref2, ref3, revived;
     if (Array.isArray(type)) {
       return this.reviveType(type[0], true);
     }
     if ('string' !== typeof type) {
       return type;
     }
-    revived = (_ref2 = (_ref3 = this.api[type]) != null ? _ref3 : window[type]) != null ? _ref2 : (_base = this.opaqueTypes)[type] != null ? _base[type] : _base[type] = new OpaqueType(type);
+    revived = (ref2 = (ref3 = this.api[type]) != null ? ref3 : window[type]) != null ? ref2 : (base = this.opaqueTypes)[type] != null ? base[type] : base[type] = new OpaqueType(type);
     if (shouldWrap) {
       return [revived];
     } else {
@@ -277,9 +277,9 @@ module.exports = Bongo = (function(_super) {
           type = reviveSchemaRecursively(bongo, type);
         }
         return [slot, type];
-      }).reduce(function(acc, _arg) {
+      }).reduce(function(acc, arg) {
         var slot, type;
-        slot = _arg[0], type = _arg[1];
+        slot = arg[0], type = arg[1];
         acc[slot] = bongo.reviveType(type);
         return acc;
       }, {});
@@ -294,7 +294,7 @@ module.exports = Bongo = (function(_super) {
     konstructor = Function('bongo', "return function " + name + " () {\n  bongo.registerInstance(this);\n  this.init.apply(this, [].slice.call(arguments));\n  this.bongo_.constructorName = '" + name + "';\n}")(this);
     EventEmitter(konstructor);
     this.wrapStaticMethods(konstructor, name, staticMethods);
-    __extends(konstructor, Model);
+    extend(konstructor, Model);
     konstructor.prototype.updateInstanceChannel = this.updateInstanceChannel;
     konstructor.on('newListener', addGlobalListener.bind(this, konstructor));
     konstructor.attributes = attributes;
@@ -313,9 +313,9 @@ module.exports = Bongo = (function(_super) {
     bongo = this;
     hasEncoder = (Encoder != null ? Encoder.XSSEncode : void 0) != null;
     return new Traverse(obj).map(function(node) {
-      var constructorName, instance, instanceId, konstructor, _ref2;
+      var constructorName, instance, instanceId, konstructor, ref2;
       if ((node != null ? node.bongo_ : void 0) != null) {
-        _ref2 = node.bongo_, constructorName = _ref2.constructorName, instanceId = _ref2.instanceId;
+        ref2 = node.bongo_, constructorName = ref2.constructorName, instanceId = ref2.instanceId;
         instance = bongo.getInstancesById(instanceId);
         if (instance != null) {
           return this.update(instance, true);
@@ -346,14 +346,14 @@ module.exports = Bongo = (function(_super) {
       var results;
       results = instances.map((function(_this) {
         return function(instance) {
-          var e, revivee;
+          var e, error, revivee;
           revivee = null;
           try {
             if (instance.snapshot != null) {
               revivee = JSON.parse(instance.snapshot, snapshotReviver);
             }
-          } catch (_error) {
-            e = _error;
+          } catch (error) {
+            e = error;
             console.warn("couldn't revive snapshot! " + instance._id);
             revivee = null;
           }
@@ -382,7 +382,7 @@ module.exports = Bongo = (function(_super) {
           if (!_this.remoteStore.has(callbackId)) {
             _this.remoteStore.add(callbackId, function() {
               var args;
-              args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+              args = 1 <= arguments.length ? slice1.call(arguments, 0) : [];
               return _this.send(callbackId, args);
             });
           }
@@ -390,7 +390,7 @@ module.exports = Bongo = (function(_super) {
         };
       })(this));
       revived = this.revive(unscrubbed);
-      if (__indexOf.call(this.getInstanceMethods(), method) >= 0) {
+      if (indexOf.call(this.getInstanceMethods(), method) >= 0) {
         return this[method].apply(this, revived);
       } else if (!isNaN(+method)) {
         callback = this.localStore.get(method);
@@ -583,7 +583,7 @@ module.exports = Bongo = (function(_super) {
     xhr.setRequestHeader("Content-type", "application/json;charset=UTF-8");
     xhr.onreadystatechange = (function(_this) {
       return function() {
-        var e, message, request, requests, _i, _len, _ref2, _results;
+        var e, error, i, len, message, ref2, request, requests, results1;
         if (xhr.readyState === 0) {
           return;
         }
@@ -593,25 +593,25 @@ module.exports = Bongo = (function(_super) {
         if (xhr.status >= 400) {
           return console.error("XHR Error: " + (JSON.stringify(xhr.status)), queue);
         }
-        if ((_ref2 = xhr.status) !== 200 && _ref2 !== 304) {
+        if ((ref2 = xhr.status) !== 200 && ref2 !== 304) {
           return;
         }
         try {
           requests = JSON.parse(xhr.response);
-        } catch (_error) {
-          e = _error;
+        } catch (error) {
+          e = error;
           message = "XHR Error: could not parse response " + xhr.response;
           _this.emit('error', new Error(message));
           return;
         }
-        _results = [];
-        for (_i = 0, _len = requests.length; _i < _len; _i++) {
-          request = requests[_i];
+        results1 = [];
+        for (i = 0, len = requests.length; i < len; i++) {
+          request = requests[i];
           if (request) {
-            _results.push(_this.handleRequest(request));
+            results1.push(_this.handleRequest(request));
           }
         }
-        return _results;
+        return results1;
       };
     })(this);
     payload = JSON.stringify({

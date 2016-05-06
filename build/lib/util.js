@@ -1,12 +1,12 @@
 'use strict';
 var asynchronizeOwnMethods, extend,
-  __slice = [].slice;
+  slice = [].slice;
 
 extend = function() {
-  var key, obj, rest, source, val, _i, _len;
-  obj = arguments[0], rest = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-  for (_i = 0, _len = rest.length; _i < _len; _i++) {
-    source = rest[_i];
+  var i, key, len, obj, rest, source, val;
+  obj = arguments[0], rest = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+  for (i = 0, len = rest.length; i < len; i++) {
+    source = rest[i];
     for (key in source) {
       val = source[key];
       obj[key] = val;
@@ -22,8 +22,8 @@ asynchronizeOwnMethods = function(ofObject) {
     var fn;
     if ('function' === typeof (fn = ofObject[key])) {
       return result[key] = function() {
-        var callback, rest, _i;
-        rest = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), callback = arguments[_i++];
+        var callback, i, rest;
+        rest = 2 <= arguments.length ? slice.call(arguments, 0, i = arguments.length - 1) : (i = 0, []), callback = arguments[i++];
         return callback(fn.apply(null, rest));
       };
     }

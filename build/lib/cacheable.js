@@ -1,6 +1,6 @@
-var ModelLoader, getModelLoader, handleBatch, handleByName, handleSingle, sinkrow;
+var ModelLoader, async, getModelLoader, handleBatch, handleByName, handleSingle;
 
-sinkrow = require('sinkrow');
+async = require('async');
 
 ModelLoader = require('./modelloader');
 
@@ -19,9 +19,9 @@ getModelLoader = (function() {
   var loading_;
   loading_ = {};
   return function(constructor, id) {
-    var loader, _base, _name;
-    loading_[_name = constructor.name] || (loading_[_name] = {});
-    return loader = (_base = loading_[constructor.name])[id] || (_base[id] = new ModelLoader(constructor, id));
+    var base, loader, name1;
+    loading_[name1 = constructor.name] || (loading_[name1] = {});
+    return loader = (base = loading_[constructor.name])[id] || (base[id] = new ModelLoader(constructor, id));
   };
 })();
 
@@ -65,7 +65,7 @@ handleBatch = function(batch, callback) {
   models = [];
   queue = batch.map((function(_this) {
     return function(single, i) {
-      return function() {
+      return function(done) {
         var constructorName, id, name, type;
         name = single.name, type = single.type, constructorName = single.constructorName, id = single.id;
         return handleSingle.call(_this, type || name || constructorName, id, function(err, model) {
@@ -73,13 +73,13 @@ handleBatch = function(batch, callback) {
             return callback(err);
           } else {
             models[i] = model;
-            return queue.fin();
+            return done();
           }
         });
       };
     };
   })(this));
-  sinkrow.dash(queue, function() {
+  return async.parallel(queue, function() {
     return callback(null, models);
   });
 };

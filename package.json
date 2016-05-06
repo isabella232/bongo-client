@@ -1,22 +1,26 @@
 {
   "name": "@koding/bongo-client",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "main": "build/lib/index.js",
   "scripts": {
     "prepublish": "make all"
   },
   "dependencies": {
-    "bluebird": "^2.9.3",
-    "dnode": "^1.2.0",
+    "bluebird": "2.10.2",
+    "dnode": "1.2.2",
     "hat": "0.0.3",
     "htmlencode": "0.0.4",
-    "kd-shim-jspath": "^0.2.0",
-    "koding-dnode-protocol": "git+ssh://git@github.com:koding/dnode-protocol#v0.2.0",
-    "microemitter": "git+ssh://git@github.com:koding/microemitter#v0.2.0",
-    "mongoop": "git+ssh://git@github.com:koding/mongoop#v0.2.0",
-    "sinkrow": "git+ssh://git@github.com:koding/sinkrow#v0.1.2",
-    "traverse": "^0.6.6"
+    "kd-shim-jspath": "0.2.0",
+    "koding-dnode-protocol": "git+ssh://git@github.com:koding/dnode-protocol#v0.2.1",
+    "microemitter": "git+ssh://git@github.com:koding/microemitter#v0.2.1",
+    "mongoop": "git+ssh://git@github.com:koding/mongoop#v0.2.1",
+    "sinkrow": "git+ssh://git@github.com:koding/sinkrow#v0.1.3",
+    "traverse": "0.6.6"
   },
+  "licenses": [{
+    "type": "Apache-2.0",
+    "url": "http://www.apache.org/licenses/LICENSE-2.0"
+  }],
   "browser": {
     "jspath": "kd-shim-jspath",
     "dnode-protocol": "koding-dnode-protocol"
