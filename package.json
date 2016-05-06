@@ -11,10 +11,10 @@
     "hat": "0.0.3",
     "htmlencode": "0.0.4",
     "kd-shim-jspath": "0.2.0",
-    "koding-dnode-protocol": "git+ssh://git@github.com:koding/dnode-protocol#v0.2.1",
-    "microemitter": "git+ssh://git@github.com:koding/microemitter#v0.2.1",
-    "mongoop": "git+ssh://git@github.com:koding/mongoop#v0.2.1",
-    "sinkrow": "git+ssh://git@github.com:koding/sinkrow#v0.1.3",
+    "koding-dnode-protocol": "koding/dnode-protocol#v0.2.1",
+    "microemitter": "koding/microemitter#v0.2.1",
+    "mongoop": "koding/mongoop#v0.2.1",
+    "sinkrow": "koding/sinkrow#v0.1.3",
     "traverse": "0.6.6"
   },
   "licenses": [{
