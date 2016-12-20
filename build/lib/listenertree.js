@@ -3,9 +3,9 @@ var ListenerTree,
   slice = [].slice;
 
 module.exports = ListenerTree = (function() {
-  var assureAt, getAt, pushAt, ref;
+  var assureAt, deleteAt, getAt, pushAt, ref;
 
-  ref = require('jspath'), assureAt = ref.assureAt, pushAt = ref.pushAt, getAt = ref.getAt;
+  ref = require('jspath'), assureAt = ref.assureAt, pushAt = ref.pushAt, deleteAt = ref.deleteAt, getAt = ref.getAt;
 
   function ListenerTree() {
     this.tree = Object.create(null);
@@ -18,7 +18,7 @@ module.exports = ListenerTree = (function() {
   };
 
   ListenerTree.prototype.off = function(routingKey, listener) {
-    console.log('ListenerTree#off is still unimplemented.');
+    deleteAt(this.tree, routingKey);
     return this;
   };
 

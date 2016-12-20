@@ -2,7 +2,7 @@
 
 module.exports = class ListenerTree
 
-  {assureAt, pushAt, getAt} = require 'jspath'
+  {assureAt, pushAt, deleteAt, getAt} = require 'jspath'
 
   constructor:->
     # we need a true dictionary; don't inherit from Object.prototype
@@ -14,7 +14,7 @@ module.exports = class ListenerTree
     @
 
   off:(routingKey, listener)->
-    console.log 'ListenerTree#off is still unimplemented.'
+    deleteAt @tree, routingKey
     @
 
   emit:(routingKey, rest...)->
