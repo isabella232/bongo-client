@@ -32,6 +32,8 @@ module.exports = class Bongo extends EventEmitter
   {slice}           = []
 
   constructor:(options)->
+    console.log "bongo/constructor", options
+
     EventEmitter this
     { @mq, @getSessionToken, @getUserArea, @fetchName, @resourceName,
       @apiEndpoint, @useWebsockets, @batchRequests, @apiDescriptor } = options
@@ -55,9 +57,12 @@ module.exports = class Bongo extends EventEmitter
 
     @api = @createRemoteApiShims @apiDescriptor
 
+
     if @mq?
+      console.log "bongo/constructor @api"
       @eventBus = new EventBus @mq
       @mq.on 'disconnected', =>
+        console.log "bongo/disconnected @api"
         @disconnectedAt = Date.now()
         @emit 'disconnected'
         @readyState = DISCONNECTED
@@ -75,12 +80,15 @@ module.exports = class Bongo extends EventEmitter
         resolve model
 
   createRemoteApiShims:(api)->
+    console.log "bongo/createRemoteApiShims api"
+
     shimmedApi = {}
     for own name, {statik, instance, attributes} of api
       shimmedApi[name] = @createConstructor name, statik, instance, attributes
     shimmedApi
 
   guardMethod = (signatures, fn) -> (rest...) ->
+    console.log "bongo/guardMethod"
     for signature in signatures when signature.test rest
       return fn.apply this, rest
     throw new Error "Unrecognized signature!"
@@ -124,10 +132,15 @@ module.exports = class Bongo extends EventEmitter
         constructor::[method] = Bongo.promibackify wrapper
 
   registerInstance:(inst)->
+    console.log "bongo/registerInstance"
+
     inst.on 'listenerRemoved', (event, listener)=>
-      @eventBus.off inst, event, listener.bind inst
+      console.log "bongo/registerInstance/listenerRemoved"
+      @eventBus?.off inst, event, listener.bind inst
+
     inst.on 'newListener', (event, listener)=>
-      @eventBus.on inst, event, listener.bind inst
+      console.log "bongo/registerInstance/newListener"
+      @eventBus?.on inst, event, listener.bind inst
 
   getEventChannelName =(name)-> "event-#{name}"
 
@@ -135,11 +148,13 @@ module.exports = class Bongo extends EventEmitter
     (rest...)-> listener.apply ctx, bongo.revive rest
 
   addGlobalListener =(konstructor, event, listener)->
-    @eventBus.staticOn konstructor, event, (rest...)=>
+    @eventBus?.staticOn konstructor, event, (rest...)=>
       revived = @revive rest
       listener.apply konstructor, revived
 
   reviveType:(type, shouldWrap)->
+    console.log "bongo/reviveType"
+
     return @reviveType type[0], yes   if Array.isArray type
     return type                       unless 'string' is typeof type
     revived = @api[type] ?
@@ -148,6 +163,7 @@ module.exports = class Bongo extends EventEmitter
     if shouldWrap then [revived] else revived
 
   reviveSchema:do->
+    console.log "bongo/reviveSchema"
     {keys}      = Object
     {isArray}   = Array
     reviveSchemaRecursively = (bongo, schema)->
@@ -165,6 +181,8 @@ module.exports = class Bongo extends EventEmitter
       reviveSchemaRecursively this, schema
 
   createConstructor:(name, staticMethods, instanceMethods, attributes)->
+    console.log "bongo/createConstructor"
+
     konstructor = Function('bongo', """
       return function #{name} () {
         bongo.registerInstance(this);
@@ -186,6 +204,8 @@ module.exports = class Bongo extends EventEmitter
   getInstanceMethods:-> ['changeLoggedInState','updateSessionToken']
 
   revive:(obj)->
+    console.log "bongo/revive"
+
     bongo = @
     hasEncoder = Encoder?.XSSEncode?
     new Traverse(obj).map (node)->
@@ -224,11 +244,17 @@ module.exports = class Bongo extends EventEmitter
       callback null, results
 
   handleRequest:(message)->
+    console.log "bongo/handleRequest", message
+
     if message?.method is 'defineApi' and not @api?
+      console.log "bongo/handleRequest/defineApi"
       @defineApi message.arguments[0]
     else if message?.method is 'handshakeDone'
+      console.log "bongo/handleRequest/handshakeDone"
       @handshakeDone()
     else
+      console.log "bongo/handleRequest/else"
+
       {method, context} = message
       scrubber = new Scrubber @localStore
       unscrubbed = scrubber.unscrub message, (callbackId)=>
@@ -249,13 +275,16 @@ module.exports = class Bongo extends EventEmitter
         # console.log method
 
   reconnectHelper:->
+    console.log "bongo/reconnectHelper"
     @mq.ready =>
+      console.log "bongo/reconnectHelper/ready"
       @readyState = CONNECTED
       @emit 'ready'
       @authenticateUser()
 
 
   connectHelper: (callback) ->
+    console.log "bongo/connectHelper"
 
     @mq.once 'connected', callback  if callback
 
@@ -275,22 +304,32 @@ module.exports = class Bongo extends EventEmitter
     @reconnectHelper()
 
     @channel.once 'broker.subscribed', =>
+      console.log "bongo/connectHelper/broker.subscribed/once"
+
       # apply the middleware
       @stack.forEach (fn)=> fn.call @
 
     @channel.on 'broker.subscribed', =>
+      console.log "bongo/connectHelper/broker.subscribed/on"
       @emit 'connected'
 
       if @disconnectedAt
+        console.log "bongo/connectHelper/@disconnectedAt"
         @emit 'reconnected', disconnectedFor: Date.now() - @disconnectedAt
         @disconnectedAt = null
 
       if @lastMessage
+        console.log "bongo/connectHelper/@lastMessage"
         @channel.publish @lastMessage
         @lastMessage = null
 
 
   connect:(callback)->
+    console.log "bongo/connect"
+    @emit 'ready'
+    @readyState = CONNECTED
+    return callback? new Error "not supported anymore"
+
     throw new Error "no broker client"  unless @mq?
 
     switch @readyState
@@ -309,21 +348,28 @@ module.exports = class Bongo extends EventEmitter
 
   bindAutoreconnect: ->
 
-    @mq.on 'disconnected', =>
+    console.log "bongo/bindAutoreconnect"
 
+    @mq.on 'disconnected', =>
+      console.log "bongo/bindAutoreconnect/disconnected"
       @mq.once 'connected', @bound 'reconnectHelper'
 
 
   disconnect:(shouldReconnect, callback)->
+    console.log "bongo/disconnect"
+
     # @channel.close().off()  if @channel?
 
     throw new Error "no broker client"  unless @mq?
 
     if 'function' is typeof shouldReconnect
+      console.log "bongo/disconnect", shouldReconnect
       callback = shouldReconnect
       shouldReconnect = no
 
     return "already disconnected"  if @readyState is NOTCONNECTED or @readyState is DISCONNECTED
+
+    console.log "bongo/disconnect $"
 
     @mq.once 'disconnected', callback.bind this  if callback?
     @mq.disconnect shouldReconnect
@@ -336,30 +382,39 @@ module.exports = class Bongo extends EventEmitter
     setTimeout @messageFailed.bind(this, message), clientTimeout
 
   ping:(callback)->
+    console.log "bongo/ping $"
     @send 'ping', callback  if @readyState is CONNECTED and @useWebsockets
 
   send:(method, args)->
+    console.log "bongo/send $"
     args = [args] unless Array.isArray args
 
     scrubber = new Scrubber @localStore
     scrubber.scrub args, =>
+      console.log "bongo/scrubber.scrub $"
       message = scrubber.toDnodeProtocol()
       message.method = method
       @sendHelper message
 
   sendHelper: (message) ->
+    console.log "bongo/sendHelper $"
     if @useWebsockets
+      console.log "bongo/sendHelper/@useWebsockets $"
 
       if @mq? and not @channel
         throw new Error 'No channel!'
 
       messageString = JSON.stringify message
       if @channel.isOpen
+        console.log "bongo/sendHelper/isOpen $"
         @channel.publish messageString
       else
+        console.log "bongo/sendHelper/isOpen else"
         @lastMessage = messageString
         @connect()
     else if @apiEndpoint
+      console.log "bongo/sendHelper/@apiEndpoint"
+
       konstructor = @api[message.method.constructorName]
       if @batchRequests and not konstructor?.attributes.bypassBatch
         @enqueueMessage message
@@ -378,6 +433,8 @@ module.exports = class Bongo extends EventEmitter
     @outboundQueue.push message
 
   sendXhr: (url, method, queue) ->
+    console.log "bongo/sendHelper/sendXhr", url, method, queue
+
     xhr = new XMLHttpRequest
     xhr.open method, url
     xhr.setRequestHeader "Content-type", "application/json;charset=UTF-8"
@@ -410,27 +467,38 @@ module.exports = class Bongo extends EventEmitter
     xhr.send payload
 
   authenticateUser:->
+    console.log "bongo/authenticateUser"
+
     clientId = @getSessionToken()
     @send 'authenticateUser', [clientId, @bound 'changeLoggedInState']
 
   handshakeDone:->
+    console.log "bongo/handshakeDone"
     return  if @readyState is CONNECTED
     @readyState = CONNECTED
+    console.log "bongo/handshakeDone/ready"
     @emit 'ready'
     @authenticateUser()
 
   defineApi:(api)->
+    console.log "bongo/defineApi"
+
     if api?
       @api or= @createRemoteApiShims api
     @handshakeDone()
 
   changeLoggedInState:(state)->
+    console.log "bongo/changeLoggedInState/state", state
     @emit 'loggedInStateChanged', state
 
   updateSessionToken:(token)->
+    console.log "bongo/updateSessionToken/token", token
     @emit 'sessionTokenChanged', token
 
   fetchChannel:(channelName, callback)->
+    console.log "bongo/fetchChannel/channelName", channelName
+    return callback? new Error "not supported anymore"
+
     throw new Error "no broker client"  unless @mq?
 
     channel = @mq.subscribe channelName
@@ -442,6 +510,9 @@ module.exports = class Bongo extends EventEmitter
   monitorPresence:(callbacks)-> @send 'monitorPresence', callbacks
 
   subscribe:(name, options={}, callback)->
+    console.log "bongo/subscribe", name, options
+    return callback? new Error "not supported anymore"
+
     throw new Error "no broker client"  unless @mq?
 
     options.serviceType ?= 'application'
@@ -454,6 +525,9 @@ module.exports = class Bongo extends EventEmitter
     return channel
 
   xhrHandshake: ->
+    console.log "bongo/xhrHandshake"
+    return @handshakeDone()
+
     @send 'xhrHandshake', (api) =>
       if @api
       then @handshakeDone()
