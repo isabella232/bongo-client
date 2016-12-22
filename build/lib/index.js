@@ -1,4 +1,4 @@
-var Bongo, Encoder, EventBus, EventEmitter, JsPath, ListenerTree, Model, OpaqueType, Promise, Signature, Traverse, bound, createBongoName, createId,
+var Bongo, Encoder, EventBus, EventEmitter, JsPath, ListenerTree, Model, OpaqueType, Promise, Signature, Traverse, bound, createBongoName, createId, trace,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice,
@@ -32,6 +32,8 @@ createBongoName = function(resourceName) {
   return "" + (createId(128)) + ".unknown.bongo-" + resourceName;
 };
 
+trace = function() {};
+
 (function() {
   Model.prototype.mixin(require('./eventemitter/broker'));
   Model.prototype.off = Model.prototype.removeListener;
@@ -58,9 +60,13 @@ module.exports = Bongo = (function(_super) {
   slice = [].slice;
 
   function Bongo(options) {
-    console.log("bongo/constructor", options);
+    var debug;
     EventEmitter(this);
-    this.mq = options.mq, this.getSessionToken = options.getSessionToken, this.getUserArea = options.getUserArea, this.fetchName = options.fetchName, this.resourceName = options.resourceName, this.apiEndpoint = options.apiEndpoint, this.useWebsockets = options.useWebsockets, this.batchRequests = options.batchRequests, this.apiDescriptor = options.apiDescriptor;
+    this.mq = options.mq, this.getSessionToken = options.getSessionToken, this.getUserArea = options.getUserArea, this.fetchName = options.fetchName, this.resourceName = options.resourceName, this.apiEndpoint = options.apiEndpoint, this.useWebsockets = options.useWebsockets, this.batchRequests = options.batchRequests, this.apiDescriptor = options.apiDescriptor, debug = options.debug;
+    if (debug) {
+      trace = console.log;
+    }
+    trace("bongo/constructor", options);
     if (this.useWebsockets == null) {
       this.useWebsockets = false;
     }
@@ -93,11 +99,11 @@ module.exports = Bongo = (function(_super) {
     }
     this.api = this.createRemoteApiShims(this.apiDescriptor);
     if (this.mq != null) {
-      console.log("bongo/constructor @api");
+      trace("bongo/constructor @api");
       this.eventBus = new EventBus(this.mq);
       this.mq.on('disconnected', (function(_this) {
         return function() {
-          console.log("bongo/disconnected @api");
+          trace("bongo/disconnected @api");
           _this.disconnectedAt = Date.now();
           _this.emit('disconnected');
           return _this.readyState = DISCONNECTED;
@@ -131,7 +137,7 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.createRemoteApiShims = function(api) {
     var attributes, instance, name, shimmedApi, statik, _ref2;
-    console.log("bongo/createRemoteApiShims api");
+    trace("bongo/createRemoteApiShims api");
     shimmedApi = {};
     for (name in api) {
       if (!__hasProp.call(api, name)) continue;
@@ -145,7 +151,7 @@ module.exports = Bongo = (function(_super) {
     return function() {
       var rest, signature, _i, _len;
       rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      console.log("bongo/guardMethod");
+      trace("bongo/guardMethod");
       for (_i = 0, _len = signatures.length; _i < _len; _i++) {
         signature = signatures[_i];
         if (signature.test(rest)) {
@@ -219,18 +225,18 @@ module.exports = Bongo = (function(_super) {
   })();
 
   Bongo.prototype.registerInstance = function(inst) {
-    console.log("bongo/registerInstance");
+    trace("bongo/registerInstance");
     inst.on('listenerRemoved', (function(_this) {
       return function(event, listener) {
         var _ref2;
-        console.log("bongo/registerInstance/listenerRemoved");
+        trace("bongo/registerInstance/listenerRemoved");
         return (_ref2 = _this.eventBus) != null ? _ref2.off(inst, event, listener.bind(inst)) : void 0;
       };
     })(this));
     return inst.on('newListener', (function(_this) {
       return function(event, listener) {
         var _ref2;
-        console.log("bongo/registerInstance/newListener");
+        trace("bongo/registerInstance/newListener");
         return (_ref2 = _this.eventBus) != null ? _ref2.on(inst, event, listener.bind(inst)) : void 0;
       };
     })(this));
@@ -262,7 +268,7 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.reviveType = function(type, shouldWrap) {
     var revived, _base, _ref2, _ref3;
-    console.log("bongo/reviveType");
+    trace("bongo/reviveType");
     if (Array.isArray(type)) {
       return this.reviveType(type[0], true);
     }
@@ -279,7 +285,7 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.reviveSchema = (function() {
     var isArray, keys, reviveSchema, reviveSchemaRecursively;
-    console.log("bongo/reviveSchema");
+    trace("bongo/reviveSchema");
     keys = Object.keys;
     isArray = Array.isArray;
     reviveSchemaRecursively = function(bongo, schema) {
@@ -304,7 +310,7 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.createConstructor = function(name, staticMethods, instanceMethods, attributes) {
     var konstructor;
-    console.log("bongo/createConstructor");
+    trace("bongo/createConstructor");
     konstructor = Function('bongo', "return function " + name + " () {\n  bongo.registerInstance(this);\n  this.init.apply(this, [].slice.call(arguments));\n  this.bongo_.constructorName = '" + name + "';\n}")(this);
     EventEmitter(konstructor);
     this.wrapStaticMethods(konstructor, name, staticMethods);
@@ -324,7 +330,7 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.revive = function(obj) {
     var bongo, hasEncoder;
-    console.log("bongo/revive");
+    trace("bongo/revive");
     bongo = this;
     hasEncoder = (Encoder != null ? Encoder.XSSEncode : void 0) != null;
     return new Traverse(obj).map(function(node) {
@@ -385,15 +391,15 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.handleRequest = function(message) {
     var callback, context, method, revived, scrubber, unscrubbed;
-    console.log("bongo/handleRequest", message);
+    trace("bongo/handleRequest", message);
     if ((message != null ? message.method : void 0) === 'defineApi' && (this.api == null)) {
-      console.log("bongo/handleRequest/defineApi");
+      trace("bongo/handleRequest/defineApi");
       return this.defineApi(message["arguments"][0]);
     } else if ((message != null ? message.method : void 0) === 'handshakeDone') {
-      console.log("bongo/handleRequest/handshakeDone");
+      trace("bongo/handleRequest/handshakeDone");
       return this.handshakeDone();
     } else {
-      console.log("bongo/handleRequest/else");
+      trace("bongo/handleRequest/else");
       method = message.method, context = message.context;
       scrubber = new Scrubber(this.localStore);
       unscrubbed = scrubber.unscrub(message, (function(_this) {
@@ -421,10 +427,10 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.reconnectHelper = function() {
-    console.log("bongo/reconnectHelper");
+    trace("bongo/reconnectHelper");
     return this.mq.ready((function(_this) {
       return function() {
-        console.log("bongo/reconnectHelper/ready");
+        trace("bongo/reconnectHelper/ready");
         _this.readyState = CONNECTED;
         _this.emit('ready');
         return _this.authenticateUser();
@@ -433,7 +439,7 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.connectHelper = function(callback) {
-    console.log("bongo/connectHelper");
+    trace("bongo/connectHelper");
     if (callback) {
       this.mq.once('connected', callback);
     }
@@ -452,7 +458,7 @@ module.exports = Bongo = (function(_super) {
     this.reconnectHelper();
     this.channel.once('broker.subscribed', (function(_this) {
       return function() {
-        console.log("bongo/connectHelper/broker.subscribed/once");
+        trace("bongo/connectHelper/broker.subscribed/once");
         return _this.stack.forEach(function(fn) {
           return fn.call(_this);
         });
@@ -460,17 +466,17 @@ module.exports = Bongo = (function(_super) {
     })(this));
     return this.channel.on('broker.subscribed', (function(_this) {
       return function() {
-        console.log("bongo/connectHelper/broker.subscribed/on");
+        trace("bongo/connectHelper/broker.subscribed/on");
         _this.emit('connected');
         if (_this.disconnectedAt) {
-          console.log("bongo/connectHelper/@disconnectedAt");
+          trace("bongo/connectHelper/@disconnectedAt");
           _this.emit('reconnected', {
             disconnectedFor: Date.now() - _this.disconnectedAt
           });
           _this.disconnectedAt = null;
         }
         if (_this.lastMessage) {
-          console.log("bongo/connectHelper/@lastMessage");
+          trace("bongo/connectHelper/@lastMessage");
           _this.channel.publish(_this.lastMessage);
           return _this.lastMessage = null;
         }
@@ -479,7 +485,7 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.connect = function(callback) {
-    console.log("bongo/connect");
+    trace("bongo/connect");
     this.emit('ready');
     this.readyState = CONNECTED;
     return typeof callback === "function" ? callback(new Error("not supported anymore")) : void 0;
@@ -508,29 +514,29 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.bindAutoreconnect = function() {
-    console.log("bongo/bindAutoreconnect");
+    trace("bongo/bindAutoreconnect");
     return this.mq.on('disconnected', (function(_this) {
       return function() {
-        console.log("bongo/bindAutoreconnect/disconnected");
+        trace("bongo/bindAutoreconnect/disconnected");
         return _this.mq.once('connected', _this.bound('reconnectHelper'));
       };
     })(this));
   };
 
   Bongo.prototype.disconnect = function(shouldReconnect, callback) {
-    console.log("bongo/disconnect");
+    trace("bongo/disconnect");
     if (this.mq == null) {
       throw new Error("no broker client");
     }
     if ('function' === typeof shouldReconnect) {
-      console.log("bongo/disconnect", shouldReconnect);
+      trace("bongo/disconnect", shouldReconnect);
       callback = shouldReconnect;
       shouldReconnect = false;
     }
     if (this.readyState === NOTCONNECTED || this.readyState === DISCONNECTED) {
       return "already disconnected";
     }
-    console.log("bongo/disconnect $");
+    trace("bongo/disconnect $");
     if (callback != null) {
       this.mq.once('disconnected', callback.bind(this));
     }
@@ -539,7 +545,7 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.messageFailed = function(message) {
-    return console.log('MESSAGE FAILED', message);
+    return trace('MESSAGE FAILED', message);
   };
 
   Bongo.prototype.getTimeout = function(message, clientTimeout) {
@@ -550,7 +556,7 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.ping = function(callback) {
-    console.log("bongo/ping $");
+    trace("bongo/ping $");
     if (this.readyState === CONNECTED && this.useWebsockets) {
       return this.send('ping', callback);
     }
@@ -558,7 +564,7 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.send = function(method, args) {
     var scrubber;
-    console.log("bongo/send $");
+    trace("bongo/send $");
     if (!Array.isArray(args)) {
       args = [args];
     }
@@ -566,7 +572,7 @@ module.exports = Bongo = (function(_super) {
     return scrubber.scrub(args, (function(_this) {
       return function() {
         var message;
-        console.log("bongo/scrubber.scrub $");
+        trace("bongo/scrubber.scrub $");
         message = scrubber.toDnodeProtocol();
         message.method = method;
         return _this.sendHelper(message);
@@ -576,23 +582,23 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.sendHelper = function(message) {
     var konstructor, messageString;
-    console.log("bongo/sendHelper $");
+    trace("bongo/sendHelper $");
     if (this.useWebsockets) {
-      console.log("bongo/sendHelper/@useWebsockets $");
+      trace("bongo/sendHelper/@useWebsockets $");
       if ((this.mq != null) && !this.channel) {
         throw new Error('No channel!');
       }
       messageString = JSON.stringify(message);
       if (this.channel.isOpen) {
-        console.log("bongo/sendHelper/isOpen $");
+        trace("bongo/sendHelper/isOpen $");
         return this.channel.publish(messageString);
       } else {
-        console.log("bongo/sendHelper/isOpen else");
+        trace("bongo/sendHelper/isOpen else");
         this.lastMessage = messageString;
         return this.connect();
       }
     } else if (this.apiEndpoint) {
-      console.log("bongo/sendHelper/@apiEndpoint");
+      trace("bongo/sendHelper/@apiEndpoint");
       konstructor = this.api[message.method.constructorName];
       if (this.batchRequests && !(konstructor != null ? konstructor.attributes.bypassBatch : void 0)) {
         return this.enqueueMessage(message);
@@ -621,7 +627,7 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.sendXhr = function(url, method, queue) {
     var payload, xhr;
-    console.log("bongo/sendHelper/sendXhr", url, method, queue);
+    trace("bongo/sendHelper/sendXhr", url, method, queue);
     xhr = new XMLHttpRequest;
     xhr.open(method, url);
     xhr.setRequestHeader("Content-type", "application/json;charset=UTF-8");
@@ -669,24 +675,24 @@ module.exports = Bongo = (function(_super) {
 
   Bongo.prototype.authenticateUser = function() {
     var clientId;
-    console.log("bongo/authenticateUser");
+    trace("bongo/authenticateUser");
     clientId = this.getSessionToken();
     return this.send('authenticateUser', [clientId, this.bound('changeLoggedInState')]);
   };
 
   Bongo.prototype.handshakeDone = function() {
-    console.log("bongo/handshakeDone");
+    trace("bongo/handshakeDone");
     if (this.readyState === CONNECTED) {
       return;
     }
     this.readyState = CONNECTED;
-    console.log("bongo/handshakeDone/ready");
+    trace("bongo/handshakeDone/ready");
     this.emit('ready');
     return this.authenticateUser();
   };
 
   Bongo.prototype.defineApi = function(api) {
-    console.log("bongo/defineApi");
+    trace("bongo/defineApi");
     if (api != null) {
       this.api || (this.api = this.createRemoteApiShims(api));
     }
@@ -694,18 +700,18 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.changeLoggedInState = function(state) {
-    console.log("bongo/changeLoggedInState/state", state);
+    trace("bongo/changeLoggedInState/state", state);
     return this.emit('loggedInStateChanged', state);
   };
 
   Bongo.prototype.updateSessionToken = function(token) {
-    console.log("bongo/updateSessionToken/token", token);
+    trace("bongo/updateSessionToken/token", token);
     return this.emit('sessionTokenChanged', token);
   };
 
   Bongo.prototype.fetchChannel = function(channelName, callback) {
     var channel;
-    console.log("bongo/fetchChannel/channelName", channelName);
+    trace("bongo/fetchChannel/channelName", channelName);
     return typeof callback === "function" ? callback(new Error("not supported anymore")) : void 0;
     if (this.mq == null) {
       throw new Error("no broker client");
@@ -729,7 +735,7 @@ module.exports = Bongo = (function(_super) {
     if (options == null) {
       options = {};
     }
-    console.log("bongo/subscribe", name, options);
+    trace("bongo/subscribe", name, options);
     return typeof callback === "function" ? callback(new Error("not supported anymore")) : void 0;
     if (this.mq == null) {
       throw new Error("no broker client");
@@ -750,7 +756,7 @@ module.exports = Bongo = (function(_super) {
   };
 
   Bongo.prototype.xhrHandshake = function() {
-    console.log("bongo/xhrHandshake");
+    trace("bongo/xhrHandshake");
     return this.handshakeDone();
     return this.send('xhrHandshake', (function(_this) {
       return function(api) {
