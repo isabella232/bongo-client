@@ -1,15 +1,15 @@
 'use strict';
 var EventEmitter, ModelLoader,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty,
-  slice = [].slice;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
 
 EventEmitter = require('microemitter');
 
-module.exports = ModelLoader = (function(superClass) {
+module.exports = ModelLoader = (function(_super) {
   var load_;
 
-  extend(ModelLoader, superClass);
+  __extends(ModelLoader, _super);
 
   function ModelLoader(konstructor, _id) {
     this._id = _id;
@@ -30,7 +30,7 @@ module.exports = ModelLoader = (function(superClass) {
     this.once('load', (function(_this) {
       return function() {
         var rest;
-        rest = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         _this.isLoading = false;
         return listener.apply(null, rest);
       };

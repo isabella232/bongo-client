@@ -19,9 +19,9 @@ getModelLoader = (function() {
   var loading_;
   loading_ = {};
   return function(constructor, id) {
-    var base, loader, name1;
-    loading_[name1 = constructor.name] || (loading_[name1] = {});
-    return loader = (base = loading_[constructor.name])[id] || (base[id] = new ModelLoader(constructor, id));
+    var loader, _base, _name;
+    loading_[_name = constructor.name] || (loading_[_name] = {});
+    return loader = (_base = loading_[constructor.name])[id] || (_base[id] = new ModelLoader(constructor, id));
   };
 })();
 

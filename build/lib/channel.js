@@ -2,9 +2,9 @@
 var Channel;
 
 module.exports = Channel = (function() {
-  function Channel(channel1) {
+  function Channel(channel) {
     var fn, method;
-    this.channel = channel1;
+    this.channel = channel;
     for (method in channel) {
       fn = channel[method];
       if ('function' === typeof fn) {
