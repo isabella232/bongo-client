@@ -1,11 +1,11 @@
 'use strict';
 var ListenerTree,
-  slice = [].slice;
+  __slice = [].slice;
 
 module.exports = ListenerTree = (function() {
-  var assureAt, deleteAt, getAt, pushAt, ref;
+  var assureAt, deleteAt, getAt, pushAt, _ref;
 
-  ref = require('jspath'), assureAt = ref.assureAt, pushAt = ref.pushAt, deleteAt = ref.deleteAt, getAt = ref.getAt;
+  _ref = require('jspath'), assureAt = _ref.assureAt, pushAt = _ref.pushAt, deleteAt = _ref.deleteAt, getAt = _ref.getAt;
 
   function ListenerTree() {
     this.tree = Object.create(null);
@@ -23,21 +23,21 @@ module.exports = ListenerTree = (function() {
   };
 
   ListenerTree.prototype.emit = function() {
-    var i, len, listener, listeners, params, rest, routingKey;
-    routingKey = arguments[0], rest = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+    var listener, listeners, params, rest, routingKey, _i, _len;
+    routingKey = arguments[0], rest = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     listeners = getAt(this.tree, routingKey);
     params = rest.map(function(param) {
-      var e, error;
+      var e;
       try {
         return JSON.parse(param);
-      } catch (error) {
-        e = error;
+      } catch (_error) {
+        e = _error;
         return param;
       }
     });
     if (listeners != null ? listeners.length : void 0) {
-      for (i = 0, len = listeners.length; i < len; i++) {
-        listener = listeners[i];
+      for (_i = 0, _len = listeners.length; _i < _len; _i++) {
+        listener = listeners[_i];
         listener.apply(null, params);
       }
     }
